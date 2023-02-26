@@ -14,24 +14,16 @@
 	"icons": {
 		"128": "icon.png"
 	},
-	"permissions": ["storage"],
-	"options_ui": {
-		"chrome_style": true,
-		"page": "options.html"
-	},
+	"permissions": ["storage", "activeTab"],
 	"browser_action": {
 		"default_icon": "icon.png",
 		"default_title": "jeparser",
-		"default_popup": "popup.html"
+		"default_popup": "popup/popup.html"
 	},
 	"content_scripts": [
 		{
 			"matches": ["*://j-archive.com/showgame.php*"],
 			"js": ["content.js"]
 		}
-	],
-	"background": {
-		"persistent": false,
-		"scripts": ["background.js"]
-	}
+	]
 }
