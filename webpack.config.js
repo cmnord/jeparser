@@ -7,6 +7,7 @@ module.exports = {
 	devtool: "source-map",
 	stats: "errors-only",
 	entry: {
+		content: "./source/content",
 		background: "./source/background",
 		options: "./source/options",
 	},
@@ -36,10 +37,6 @@ module.exports = {
 					globOptions: {
 						ignore: ["**/*.js"],
 					},
-				},
-				{
-					from: "node_modules/webextension-polyfill/dist/browser-polyfill.min.js",
-					to: "browser-polyfill.min.js",
 				},
 			],
 		}),
