@@ -1,7 +1,3 @@
-import optionsStorage from "./options-storage";
-
-optionsStorage.syncForm("#options-form");
-
 const rangeInputs = [
 	...document.querySelectorAll('input[type="range"][name^="color"]'),
 ] as HTMLInputElement[];
@@ -9,6 +5,8 @@ const numberInputs = [
 	...document.querySelectorAll('input[type="number"][name^="color"]'),
 ] as HTMLInputElement[];
 const output = document.querySelector(".color-output");
+
+console.log("options.ts running");
 
 function updateColor() {
 	if (output) {
@@ -30,3 +28,5 @@ for (const input of rangeInputs) {
 }
 
 window.addEventListener("load", updateColor);
+
+export {};
