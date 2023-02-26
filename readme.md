@@ -12,8 +12,6 @@
 
 > Barebones boilerplate with webpack, options handler and auto-publishing.
 
-![Sample extension output](media/previewer.png)
-
 ## Features
 
 - Use modern Promise-based `browser.*` APIs [webextension-polyfill][link-webext-polyfill].

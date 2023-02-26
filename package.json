@@ -14,6 +14,7 @@
 		"release": "VER=$(daily-version) run-s build version release:*"
 	},
 	"devDependencies": {
+		"@types/firefox-webext-browser": "^109.0.0",
 		"chrome-webstore-upload-cli": "^2.1.0",
 		"copy-webpack-plugin": "^11.0.0",
 		"daily-version": "^0.12.0",
@@ -25,6 +26,8 @@
 		"stylelint": "^15.2.0",
 		"stylelint-config-xo": "^0.15.0",
 		"terser-webpack-plugin": "^5.3.6",
+		"ts-loader": "^9.4.2",
+		"typescript": "^4.9.5",
 		"web-ext": "^7.5.0",
 		"web-ext-submit": "^7.5.0",
 		"webpack": "^5.75.0",
