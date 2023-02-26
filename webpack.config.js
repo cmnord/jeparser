@@ -10,9 +10,21 @@ module.exports = {
 		background: "./source/background",
 		options: "./source/options",
 	},
+	module: {
+		rules: [
+			{
+				test: /\.(js|ts|tsx)$/,
+				use: "ts-loader",
+				exclude: /node_modules/,
+			},
+		],
+	},
 	output: {
-		path: path.join(__dirname, "distribution"),
+		path: path.resolve(__dirname, "distribution"),
 		filename: "[name].js",
+	},
+	resolve: {
+		extensions: [".ts", ".tsx", ".js"],
 	},
 	plugins: [
 		new SizePlugin(),
