@@ -7,7 +7,7 @@ module.exports = {
 	devtool: "source-map",
 	stats: "errors-only",
 	entry: {
-		content: "./source/content",
+		"content-script": "./source/content-script",
 		"popup/options": "./source/popup/options",
 	},
 	module: {

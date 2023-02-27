@@ -1,4 +1,4 @@
-import { Game } from "source/content";
+import { Game } from "source/content-script";
 
 interface Response {
 	game: Game | null;
