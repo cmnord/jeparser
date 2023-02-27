@@ -25,10 +25,14 @@ interface Clue {
 }
 
 class NotFoundError extends Error {
-	constructor(message: string) {
+	constructor(message?: string) {
 		super(message);
 		this.name = "NotFoundError";
 	}
+}
+
+function isNotFoundError(error: unknown): error is NotFoundError {
+	return error instanceof Error && error.name === "NotFoundError";
 }
 
 const CORRECT_RESPONSE_PREFIX = '<em class="correct_response">';
@@ -298,10 +302,11 @@ class ClueParser {
 			const answer = parseCorrectResponse(mouseOverDiv, `clue ${i}, ${j}`);
 			this.answer = answer;
 		} catch (error: unknown) {
-			if (error instanceof NotFoundError) {
+			if (isNotFoundError(error)) {
 				this.answer = "Unrevealed";
+			} else {
+				throw error;
 			}
-			throw error;
 		}
 	}
 }
