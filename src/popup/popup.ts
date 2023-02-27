@@ -18,7 +18,6 @@ async function requestGame() {
 	const response: Response = await browser.tabs.sendMessage(tabId, {
 		message: "parse",
 	});
-	console.log(response);
 
 	const game = response.game;
 	if (response.error) {
