@@ -20,6 +20,11 @@ Finally, run the `web-ext` development version of the extension with:
 npm run start:firefox # or your browser of choice
 ```
 
+Open
+[about:debugging#/runtime/this-firefox](about:debugging#/runtime/this-firefox)
+on Firefox in the development browser and click "Inspect" on the extension to
+debug the extension.
+
 ## Features
 
 - Use modern Promise-based `browser.*` APIs [webextension-polyfill][link-webext-polyfill].
