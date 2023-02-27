@@ -7,6 +7,20 @@ interface Response {
 	error?: string;
 }
 
+const CONTENT_SCRIPT_PERMISSION_ERROR =
+	"Could not establish connection. Receiving end does not exist.";
+
+async function main() {
+	try {
+		const game = await requestGame();
+		showGame(game);
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			reportExecuteScriptError(error.message);
+		}
+	}
+}
+
 /** requestGame sends a message to the content script when the popup opens to get
  * the content of the page. */
 async function requestGame() {
@@ -15,18 +29,28 @@ async function requestGame() {
 	if (!tabId) {
 		throw new Error("could not find active tab ID");
 	}
-	const response: Response = await browser.tabs.sendMessage(tabId, {
-		message: "parse",
-	});
 
-	const game = response.game;
-	if (response.error) {
-		return reportExecuteScriptError(response.error);
+	try {
+		const response: Response = await browser.tabs.sendMessage(tabId, {
+			message: "parse",
+		});
+		const game = response.game;
+		if (response.error) {
+			throw new Error(response.error);
+		}
+		if (!game) {
+			throw new Error("game missing from response");
+		}
+		return game;
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			if (error.message === CONTENT_SCRIPT_PERMISSION_ERROR) {
+				throw new Error("Open a J! Archive game to run this extension.");
+			}
+			throw error;
+		}
+		throw new Error("unknown error");
 	}
-	if (!game) {
-		return reportExecuteScriptError("unknown error");
-	}
-	showGame(game);
 }
 
 /** There was an error executing the script.  Display the popup's error message,
@@ -66,7 +90,7 @@ function showGame(game: Game) {
 }
 
 (async () => {
-	await requestGame();
+	await main();
 })();
 
 export {};
