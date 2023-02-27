@@ -42,7 +42,7 @@ browser.runtime.onMessage.addListener(
  * game in JSON. */
 function parseGame() {
 	try {
-		const gameParser = new SoupGame(document);
+		const gameParser = new GameParser(document);
 		const game = gameParser.jsonify();
 		return { game, error: "" };
 	} catch (error: unknown) {
@@ -54,12 +54,12 @@ function parseGame() {
 }
 
 // Classes based on https://glitch.com/~jarchive-json
-export class SoupGame {
+export class GameParser {
 	private title: string;
 	private note: string;
-	private j: SoupRound;
-	private dj: SoupRound;
-	private fj: FinalSoup;
+	private j: RoundParser;
+	private dj: RoundParser;
+	private fj: FinalRoundParser;
 
 	constructor(document: Document) {
 		const title = document.querySelector("#game_title")?.textContent;
@@ -74,26 +74,25 @@ export class SoupGame {
 		}
 		this.note = note;
 
-		const jSoup = document.getElementById("jeopardy_round");
-		if (!jSoup) {
+		const jDiv = document.getElementById("jeopardy_round");
+		if (!jDiv) {
 			throw new Error("could not find id jeopardy_round on page");
 		}
-		this.j = new SoupRound(jSoup);
-		this.j.parseAnswers(jSoup);
+		this.j = new RoundParser(jDiv);
+		this.j.parseAnswers(jDiv);
 
-		const djSoup = document.getElementById("double_jeopardy_round");
-		if (!djSoup) {
+		const djDiv = document.getElementById("double_jeopardy_round");
+		if (!djDiv) {
 			throw new Error("could not find id double_jeopardy_round on page");
 		}
-		this.dj = new SoupRound(djSoup);
-		this.dj.parseAnswers(djSoup);
+		this.dj = new RoundParser(djDiv);
+		this.dj.parseAnswers(djDiv);
 
-		const fjSoup = document.getElementById("final_jeopardy_round");
-		if (!fjSoup) {
+		const fjDiv = document.getElementById("final_jeopardy_round");
+		if (!fjDiv) {
 			throw new Error("could not find id final_jeopardy_round on page");
 		}
-		this.fj = new FinalSoup(fjSoup);
-		this.fj.addAnswer(fjSoup);
+		this.fj = new FinalRoundParser(fjDiv);
 	}
 
 	jsonify(): Game {
@@ -107,39 +106,40 @@ export class SoupGame {
 	}
 }
 
-class FinalSoup {
+class FinalRoundParser {
 	private category: string;
 	private clue: string;
-	private answer?: string;
+	private answer: string;
 
-	constructor(roundSoup: HTMLElement) {
-		// clueSoup = roundSoup.find_all('td', class_='clue')
-		const categoryNameSoup =
-			roundSoup.querySelector(".category_name")?.textContent;
-		if (!categoryNameSoup) {
+	constructor(roundDiv: HTMLElement) {
+		const categoryName = roundDiv.querySelector(".category_name")?.textContent;
+		if (!categoryName) {
 			throw new Error("could not find class category_name on page");
 		}
-		this.category = categoryNameSoup;
-		const clueTextSoup = roundSoup.querySelector(".clue_text")?.textContent;
-		if (!clueTextSoup) {
+		this.category = categoryName;
+		const clueText = roundDiv.querySelector(".clue_text")?.textContent;
+		if (!clueText) {
 			throw new Error("could not find class clue_text on page");
 		}
-		this.clue = clueTextSoup;
-	}
+		this.clue = clueText;
 
-	addAnswer(answerSoup: HTMLElement) {
-		const categoryDiv = answerSoup.querySelector(".category");
+		const categoryDiv = roundDiv.querySelector(".category");
 		const mouseOverDiv = categoryDiv?.children[0];
 		const mouseOverAttribute = mouseOverDiv?.getAttribute("onmouseover");
-		const start = mouseOverAttribute?.indexOf(CORRECT_RESPONSE_PREFIX);
-		const end = mouseOverAttribute?.indexOf(CORRECT_RESPONSE_SUFFIX);
+		if (!mouseOverAttribute) {
+			throw new Error(
+				"could not find onmouseover attribute inside final round element"
+			);
+		}
+		const start = mouseOverAttribute.indexOf(CORRECT_RESPONSE_PREFIX);
+		const end = mouseOverAttribute.indexOf(CORRECT_RESPONSE_SUFFIX);
 		if (
 			start !== undefined &&
 			start !== -1 &&
 			end !== undefined &&
 			end !== -1
 		) {
-			const correctResponse = mouseOverAttribute?.substring(
+			const correctResponse = mouseOverAttribute.substring(
 				start + CORRECT_RESPONSE_PREFIX.length,
 				end
 			);
@@ -149,13 +149,6 @@ class FinalSoup {
 		throw new Error(
 			"could not find correct response in final jeopardy element"
 		);
-	}
-
-	printRound() {
-		console.log();
-		console.log(this.category);
-		console.log(this.clue);
-		console.log(this.answer);
 	}
 
 	jsonify() {
@@ -178,50 +171,37 @@ class FinalSoup {
 	}
 }
 
-class SoupRound {
+class RoundParser {
 	private categories: string[];
-	private clues: SoupClue[];
+	private clues: ClueParser[];
 
-	constructor(roundSoup: HTMLElement) {
+	constructor(roundDiv: HTMLElement) {
 		// Identify the Categories
-		const categorySoup = roundSoup.getElementsByClassName("category_name"); // TODO: also td?
+		const categoryDivs = roundDiv.getElementsByClassName("category_name"); // TODO: also td?
 		this.categories = [];
-		// console.log("\nCategories:");
-		for (const cat of categorySoup) {
+		for (const cat of categoryDivs) {
 			this.categories.push(cat.textContent || "");
-			// console.log(cat.text);
 		}
 
 		// Pull Clues
 		let col = 0;
-		const clueSoup = roundSoup.getElementsByClassName("clue"); // TODO: also td?
+		const clueDivs = roundDiv.getElementsByClassName("clue"); // TODO: also td?
 		this.clues = [];
-		for (const clue of clueSoup) {
-			this.clues.push(new SoupClue(clue, this.categories[col]));
+		for (const clue of clueDivs) {
+			this.clues.push(new ClueParser(clue, this.categories[col]));
 			col += 1;
 			if (col > 5) col = 0;
 		}
 	}
 
-	parseAnswers(answerSoup: HTMLElement) {
-		const soupClues = answerSoup.getElementsByClassName("clue"); // TODO: also td?
+	parseAnswers(roundDiv: HTMLElement) {
+		const clueDivs = roundDiv.getElementsByClassName("clue"); // TODO: also td?
 
-		for (let i = 0; i < soupClues.length; i++) {
-			const answer = soupClues[i];
+		for (let i = 0; i < clueDivs.length; i++) {
+			const answer = clueDivs[i];
 			if (i < this.clues.length) {
 				this.clues[i].addAnswer(answer);
 			}
-		}
-	}
-
-	printRound() {
-		for (const question of this.clues) {
-			console.log("");
-			console.log(question.category);
-			console.log(question.value);
-			console.log(question.clue);
-			console.log(question.answer);
-			console.log(question.order);
 		}
 	}
 
@@ -267,7 +247,7 @@ class SoupRound {
 	}
 }
 
-class SoupClue {
+class ClueParser {
 	clue: string;
 	category: string;
 	value: number;
@@ -275,14 +255,14 @@ class SoupClue {
 	answer?: string;
 	isDailyDouble: boolean;
 
-	constructor(clueSoup: Element, category: string) {
+	constructor(clueDiv: Element, category: string) {
 		// Identify Clue Text and Category
 		try {
-			const soupText = clueSoup.querySelector(".clue_text")?.textContent;
-			if (!soupText) {
+			const clue = clueDiv.querySelector(".clue_text")?.textContent;
+			if (!clue) {
 				throw new Error("could not find class clue_text on page");
 			}
-			this.clue = soupText;
+			this.clue = clue;
 		} catch (error: unknown) {
 			// AttributeError
 			this.clue = "Unrevealed";
@@ -291,7 +271,7 @@ class SoupClue {
 
 		// Find Clue Value
 		try {
-			const valueStr = clueSoup
+			const valueStr = clueDiv
 				.querySelector(".clue_value")
 				?.textContent?.slice(1);
 			this.value = parseInt(valueStr ?? "");
@@ -304,8 +284,7 @@ class SoupClue {
 
 		// Find Order of Clue in Round
 		try {
-			const orderStr =
-				clueSoup.querySelector(".clue_order_number")?.textContent;
+			const orderStr = clueDiv.querySelector(".clue_order_number")?.textContent;
 			this.order = parseInt(orderStr ?? "");
 		} catch (error: unknown) {
 			// AttributeError
@@ -313,16 +292,15 @@ class SoupClue {
 		}
 	}
 
-	addAnswer(answerSoup: Element) {
+	addAnswer(clueDiv: Element) {
 		try {
-			const soupResult =
-				answerSoup.querySelector(".correct_response")?.textContent;
-			if (!soupResult) {
+			const answer = clueDiv.querySelector(".correct_response")?.textContent;
+			if (!answer) {
 				throw new Error(
 					"could not find class correct_response in clue element"
 				);
 			}
-			this.answer = soupResult;
+			this.answer = answer;
 		} catch (error: unknown) {
 			// AttributeError
 			this.answer = "Mystery";
