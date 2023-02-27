@@ -23,7 +23,7 @@
 	"content_scripts": [
 		{
 			"matches": ["*://j-archive.com/showgame.php*"],
-			"js": ["content-script.js"],
+			"js": ["content-script.js", "browser-polyfill.min.js"],
 			"run_at": "document_end"
 		}
 	]

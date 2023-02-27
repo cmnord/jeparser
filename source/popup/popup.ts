@@ -1,3 +1,5 @@
+import browser from "webextension-polyfill";
+
 import { Game } from "source/content-script";
 
 interface Response {

@@ -11,6 +11,7 @@
 	},
 	"devDependencies": {
 		"@types/firefox-webext-browser": "^109.0.0",
+		"@types/webextension-polyfill": "^0.10.0",
 		"chrome-webstore-upload-cli": "^2.1.0",
 		"copy-webpack-plugin": "^11.0.0",
 		"daily-version": "^0.12.0",
