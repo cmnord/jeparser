@@ -276,7 +276,7 @@ class ClueParser {
 			const valueStr = clueDiv
 				.querySelector(".clue_value")
 				?.textContent?.slice(1);
-			this.value = parseInt(valueStr ?? "");
+			this.value = parseInt(valueStr ?? "") || 0;
 			this.isDailyDouble = false;
 		} catch (error: unknown) {
 			// AttributeError
