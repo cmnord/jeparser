@@ -237,7 +237,6 @@ class RoundParser {
 					value: clue.value,
 					clue: clue.clue,
 					answer: clue.answer!,
-					order: clue.order,
 				};
 				jsonData.categories[categoryIdx].clues.push(clueDict);
 			}
@@ -250,7 +249,6 @@ class ClueParser {
 	clue: string;
 	category: string;
 	value: number;
-	order: number;
 	answer: string;
 	isDailyDouble: boolean;
 	i: number;
@@ -285,15 +283,6 @@ class ClueParser {
 			// AttributeError
 			this.value = 0;
 			this.isDailyDouble = true;
-		}
-
-		// Find Order of Clue in Round
-		try {
-			const orderStr = clueDiv.querySelector(".clue_order_number")?.textContent;
-			this.order = parseInt(orderStr ?? "");
-		} catch (error: unknown) {
-			// AttributeError
-			this.order = 100;
 		}
 
 		const mouseOverDiv =
