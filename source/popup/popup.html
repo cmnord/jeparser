@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
@@ -12,10 +11,17 @@
 	</head>
 
 	<body>
-		<body>
-			<h2>Jeparser</h2>
-			<hr />
-		</body>
+		<h2>Jeparser</h2>
+		<hr />
+		<div id="popup-content" class="popup-content">
+			<div id="game" class="game-json">No game was found on this page.</div>
+			<a id="download-link" class="download">
+				<button id="download-button" disabled>Download game</button>
+			</a>
+		</div>
+		<div id="error-content" class="hidden">
+			<p>Could not parse this game. Please try a different game.</p>
+		</div>
 		<script src="options.js"></script>
 	</body>
 </html>
