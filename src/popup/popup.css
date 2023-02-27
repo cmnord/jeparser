@@ -1,15 +1,82 @@
 html,
 body {
 	min-width: 550px;
-	overflow-x: scroll;
+	font-family: arial, verdana, helvetica, sans-serif;
+	background-color: #00003a;
+}
+
+.body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: white;
+}
+
+.link {
+	color: #fab85b;
+	font-size: small;
 }
 
 .hidden {
 	display: none;
 }
 
+.popup-content:not(.hidden) {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.button {
+	display: inline-block;
+	padding: 0.5em 1em;
+
+	border-width: 2px;
+	border-style: outset;
+	border-bottom-color: #000088;
+	border-left-color: #0000ee;
+	border-right-color: #000099;
+	border-top-color: #0000ff;
+
+	background: #0000af;
+	color: #fff;
+	transition: color 0.2s, background 0.2s;
+}
+
+.button:hover {
+	background: #000088;
+	color: #fff;
+	cursor: pointer;
+}
+
+.button:hover[disabled] {
+	cursor: not-allowed;
+}
+
 .game-json {
-	white-space: pre;
+	display: block;
+	overflow: auto;
+	padding: 2em;
+	margin: 0 1em;
+	background: lightgray;
+	border-radius: 1em;
+	tab-size: 1em;
+	font-size: small;
+}
+
+.error-content {
+	padding: 2em;
+	margin: 0 1em;
+	border-radius: 1em;
+	background: lightpink;
+	color: darkred;
+	font-family: monospace;
 }
 
 /* Firefox only */

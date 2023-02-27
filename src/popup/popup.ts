@@ -69,10 +69,10 @@ function reportExecuteScriptError(error: string) {
  * to download it. */
 function showGame(game: Game) {
 	const stringifiedGame = JSON.stringify(game, null, "\t");
-	const gameDiv = document.querySelector("#game");
-	if (gameDiv) {
-		gameDiv.classList.remove("hidden");
-		gameDiv.textContent = stringifiedGame;
+	const gameElement = document.querySelector("#game");
+	if (gameElement) {
+		gameElement.classList.remove("hidden");
+		gameElement.textContent = stringifiedGame;
 	}
 	const downloadLink = document.querySelector("#download-link");
 	if (downloadLink) {
