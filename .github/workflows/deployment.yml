@@ -2,8 +2,6 @@
 name: Deployment
 
 on:
-  schedule:
-    - cron: "31 13 * * 3"
   push:
     tags:
       - "20.*"
@@ -20,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: npm install
-      - run: npm test # This includes the build
+      - run: npm run build
       - uses: fregante/daily-version-action@v1
         name: Create tag if necessary
         id: daily-version
