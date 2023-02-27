@@ -11,7 +11,7 @@ npm install
 Then run the Webpack server:
 
 ```sh
-npm run watch
+npm run dev
 ```
 
 Finally, run the `web-ext` development version of the extension with:
