@@ -24,6 +24,13 @@ interface Clue {
 	value: number;
 }
 
+class NotFoundError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "NotFoundError";
+	}
+}
+
 const CORRECT_RESPONSE_PREFIX = '<em class="correct_response">';
 const CORRECT_RESPONSE_SUFFIX = "</em>";
 
@@ -79,14 +86,12 @@ export class GameParser {
 			throw new Error("could not find id jeopardy_round on page");
 		}
 		this.j = new RoundParser(jDiv);
-		this.j.parseAnswers(jDiv);
 
 		const djDiv = document.getElementById("double_jeopardy_round");
 		if (!djDiv) {
 			throw new Error("could not find id double_jeopardy_round on page");
 		}
 		this.dj = new RoundParser(djDiv);
-		this.dj.parseAnswers(djDiv);
 
 		const fjDiv = document.getElementById("final_jeopardy_round");
 		if (!fjDiv) {
@@ -104,6 +109,27 @@ export class GameParser {
 			boards: [this.j.jsonify(), this.dj.jsonify(), this.fj.jsonify()],
 		};
 	}
+}
+
+/** parseCorrectResponse parses the onmouseover attribute of the clue header
+ * element to find the correct response. */
+function parseCorrectResponse(hoverElement: Element | undefined, name: string) {
+	const mouseOverAttribute = hoverElement?.getAttribute("onmouseover");
+	if (!mouseOverAttribute) {
+		throw new NotFoundError(
+			"could not find onmouseover attribute inside element " + name
+		);
+	}
+	const start = mouseOverAttribute.indexOf(CORRECT_RESPONSE_PREFIX);
+	const end = mouseOverAttribute.indexOf(CORRECT_RESPONSE_SUFFIX);
+	if (start !== undefined && start !== -1 && end !== undefined && end !== -1) {
+		const correctResponse = mouseOverAttribute.substring(
+			start + CORRECT_RESPONSE_PREFIX.length,
+			end
+		);
+		return correctResponse;
+	}
+	throw new NotFoundError("could not find correct response in element " + name);
 }
 
 class FinalRoundParser {
@@ -125,30 +151,7 @@ class FinalRoundParser {
 
 		const categoryDiv = roundDiv.querySelector(".category");
 		const mouseOverDiv = categoryDiv?.children[0];
-		const mouseOverAttribute = mouseOverDiv?.getAttribute("onmouseover");
-		if (!mouseOverAttribute) {
-			throw new Error(
-				"could not find onmouseover attribute inside final round element"
-			);
-		}
-		const start = mouseOverAttribute.indexOf(CORRECT_RESPONSE_PREFIX);
-		const end = mouseOverAttribute.indexOf(CORRECT_RESPONSE_SUFFIX);
-		if (
-			start !== undefined &&
-			start !== -1 &&
-			end !== undefined &&
-			end !== -1
-		) {
-			const correctResponse = mouseOverAttribute.substring(
-				start + CORRECT_RESPONSE_PREFIX.length,
-				end
-			);
-			this.answer = correctResponse;
-			return;
-		}
-		throw new Error(
-			"could not find correct response in final jeopardy element"
-		);
+		this.answer = parseCorrectResponse(mouseOverDiv, "final jeopardy");
 	}
 
 	jsonify() {
@@ -187,21 +190,13 @@ class RoundParser {
 		let col = 0;
 		const clueDivs = roundDiv.getElementsByClassName("clue"); // TODO: also td?
 		this.clues = [];
+		let row = 0;
 		for (const clue of clueDivs) {
-			this.clues.push(new ClueParser(clue, this.categories[col]));
+			this.clues.push(new ClueParser(clue, this.categories[col], row, col));
 			col += 1;
+			row += 1;
 			if (col > 5) col = 0;
-		}
-	}
-
-	parseAnswers(roundDiv: HTMLElement) {
-		const clueDivs = roundDiv.getElementsByClassName("clue"); // TODO: also td?
-
-		for (let i = 0; i < clueDivs.length; i++) {
-			const answer = clueDivs[i];
-			if (i < this.clues.length) {
-				this.clues[i].addAnswer(answer);
-			}
+			if (row > 4) row = 0;
 		}
 	}
 
@@ -252,15 +247,21 @@ class ClueParser {
 	category: string;
 	value: number;
 	order: number;
-	answer?: string;
+	answer: string;
 	isDailyDouble: boolean;
+	i: number;
+	j: number;
 
-	constructor(clueDiv: Element, category: string) {
+	constructor(clueDiv: Element, category: string, i: number, j: number) {
+		this.i = i;
+		this.j = j;
 		// Identify Clue Text and Category
 		try {
 			const clue = clueDiv.querySelector(".clue_text")?.textContent;
 			if (!clue) {
-				throw new Error("could not find class clue_text on page");
+				throw new Error(
+					`could not find class clue_text on page for clue ${i}, ${j}`
+				);
 			}
 			this.clue = clue;
 		} catch (error: unknown) {
@@ -290,20 +291,17 @@ class ClueParser {
 			// AttributeError
 			this.order = 100;
 		}
-	}
 
-	addAnswer(clueDiv: Element) {
+		const mouseOverDiv =
+			clueDiv.children[0]?.children[0]?.children[0]?.children[0]?.children[0];
 		try {
-			const answer = clueDiv.querySelector(".correct_response")?.textContent;
-			if (!answer) {
-				throw new Error(
-					"could not find class correct_response in clue element"
-				);
-			}
+			const answer = parseCorrectResponse(mouseOverDiv, `clue ${i}, ${j}`);
 			this.answer = answer;
 		} catch (error: unknown) {
-			// AttributeError
-			this.answer = "Mystery";
+			if (error instanceof NotFoundError) {
+				this.answer = "Unrevealed";
+			}
+			throw error;
 		}
 	}
 }
