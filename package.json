@@ -2,7 +2,6 @@
 	"private": true,
 	"scripts": {
 		"lint": "run-p lint:*",
-		"lint:css": "stylelint source/**/*.css",
 		"lint-fix": "run-p 'lint:* -- --fix'",
 		"test": "run-s lint:* build",
 		"build": "webpack --mode=production",
@@ -22,7 +21,6 @@
 		"eslint": "^6.1.0",
 		"npm-run-all": "^4.1.5",
 		"size-plugin": "^1.2.0",
-		"stylelint": "^15.2.0",
 		"terser-webpack-plugin": "^5.3.6",
 		"ts-loader": "^9.4.2",
 		"typescript": "^4.9.5",
