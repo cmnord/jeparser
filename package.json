@@ -3,13 +3,10 @@
 	"scripts": {
 		"build": "webpack --mode=production",
 		"dev": "webpack --mode=development --watch",
-		"lint": "run-p lint:*",
-		"lint-fix": "run-p 'lint:* -- --fix'",
 		"release:cws": "webstore upload --source=distribution --auto-publish",
 		"release:amo": "web-ext-submit --source-dir distribution",
 		"release": "VER=$(daily-version) run-s build version release:*",
 		"start:firefox": "web-ext run --source-dir distribution",
-		"test": "run-s lint:* build",
 		"version": "dot-json distribution/manifest.json version $VER"
 	},
 	"devDependencies": {
