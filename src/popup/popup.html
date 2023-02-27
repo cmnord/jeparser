@@ -11,15 +11,22 @@
 	</head>
 
 	<body>
-		<h2>Jeparser</h2>
+		<div class="header">
+			<h2>Jeparser</h2>
+			<a class="link" href="https://github.com/cmnord/jeparser/issues">
+				Extension source code
+			</a>
+		</div>
 		<hr />
 		<div id="popup-content" class="popup-content">
 			<a id="download-link" class="download">
-				<button id="download-button" disabled>Download game</button>
+				<button id="download-button" disabled class="button">
+					Download game
+				</button>
 			</a>
-			<div id="game" class="game-json">No game was found on this page.</div>
+			<pre id="game" class="game-json">No game was found on this page.</pre>
 		</div>
-		<div id="error-content" class="hidden">
+		<div id="error-content" class="hidden error-content">
 			<p>Could not parse this game. Please try a different game.</p>
 		</div>
 		<script
