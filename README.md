@@ -1,5 +1,7 @@
 # Jeparser
 
+<img width="802" alt="image" src="https://user-images.githubusercontent.com/14882297/221532033-ac6259a8-2ea2-47af-8e44-1d444861ccf2.png">
+
 ## Development
 
 To run the app locally, first install local dependencies:
@@ -57,3 +59,6 @@ Thanks to the included [GitHub Action Workflows](.github/workflows), if you set 
 ## License
 
 [MIT](https://github.com/cmnord/jeparser/blob/main/LICENSE) (c) [cmnord](https://github.com/cmnord/)
+
+[link-cws-keys]: https://github.com/DrewML/chrome-webstore-upload/blob/master/How%20to%20generate%20Google%20API%20keys.md
+[link-amo-keys]: https://addons.mozilla.org/en-US/developers/addon/api/key
