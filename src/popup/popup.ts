@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill";
 
-import { Game } from "source/content-script";
+import { Game } from "src/content-script";
 
 interface Response {
 	game: Game | null;
@@ -18,13 +18,14 @@ async function requestGame() {
 	const response: Response = await browser.tabs.sendMessage(tabId, {
 		message: "parse",
 	});
+	console.log(response);
 
-	if (response.error) {
-		reportExecuteScriptError(response.error);
-	}
 	const game = response.game;
+	if (response.error) {
+		return reportExecuteScriptError(response.error);
+	}
 	if (!game) {
-		return reportExecuteScriptError("could not parse game");
+		return reportExecuteScriptError("unknown error");
 	}
 	showGame(game);
 }
@@ -33,7 +34,11 @@ async function requestGame() {
  * and hide the normal UI. */
 function reportExecuteScriptError(error: string) {
 	document.querySelector("#popup-content")?.classList.add("hidden");
-	document.querySelector("#error-content")?.classList.remove("hidden");
+	const errorDiv = document.querySelector("#error-content");
+	if (errorDiv) {
+		errorDiv.classList.remove("hidden");
+		errorDiv.textContent = error;
+	}
 	console.error(`Failed to execute content script: ${error}`);
 }
 
