@@ -28,7 +28,6 @@
 		"webpack-cli": "^5.0.1"
 	},
 	"dependencies": {
-		"webext-options-sync": "^0.21.2",
 		"webextension-polyfill": "^0.4.0"
 	}
 }

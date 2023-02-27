@@ -28,9 +28,7 @@ debug the extension.
 ## Features
 
 - Use modern Promise-based `browser.*` APIs [webextension-polyfill][link-webext-polyfill].
-- [Auto-syncing options](#auto-syncing-options).
 - [Auto-publishing](#publishing) with auto-versioning and support for manual releases.
-- [Extensive configuration documentation](#configuration).
 
 ### Publishing
 
