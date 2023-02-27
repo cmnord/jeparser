@@ -1,3 +1,5 @@
+import browser from "webextension-polyfill";
+
 export interface Game {
 	title: string;
 	author: string;
@@ -24,12 +26,14 @@ interface Clue {
 
 // On a message from the popup script, the content script parses the body of the
 // page and returns it to the client in JSON form.
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	if (message.message === "parse") {
-		const { game, error } = parseGame();
-		sendResponse({ game, error });
+browser.runtime.onMessage.addListener(
+	(message, _sender, sendResponse: (response?: any) => void) => {
+		if (message.message === "parse") {
+			const { game, error } = parseGame();
+			sendResponse({ game, error });
+		}
 	}
-});
+);
 
 /** parseGame parses the j-archive website and returns a representation of the
  * game in JSON. */

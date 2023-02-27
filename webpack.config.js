@@ -34,8 +34,12 @@ module.exports = {
 					from: "**/*",
 					context: "source",
 					globOptions: {
-						ignore: ["**/*.js"],
+						ignore: ["**/*.js", "**/*.ts", "**/*.tsx"],
 					},
+				},
+				{
+					from: "node_modules/webextension-polyfill/dist/browser-polyfill.min.js",
+					to: "browser-polyfill.min.js",
 				},
 			],
 		}),
