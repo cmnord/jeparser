@@ -56,6 +56,14 @@ Thanks to the included [GitHub Action Workflows](.github/workflows), if you set 
 - when creating a specific version tag based on the same date format (like `20.1.2` or `20.1.2.3`)
 - on a schedule, by default [every week](.github/workflows/deploy-automatic.yml) (but only if there are any new commits in the last tag)
 
+## Thanks
+
+- [WayneD/j-play](https://github.com/WayneD/j-play)
+- [jpd236/CrosswordScraper](https://github.com/jpd236/CrosswordScraper)
+- Templates:
+  [orta/typescript-web-extension](https://github.com/orta/typescript-web-extension),
+  [fregante/browser-extension-template](https://github.com/fregante/browser-extension-template)
+
 ## License
 
 [MIT](https://github.com/cmnord/jeparser/blob/main/LICENSE) (c) [cmnord](https://github.com/cmnord/)
