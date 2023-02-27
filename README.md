@@ -21,14 +21,11 @@ npm run start:firefox # or your browser of choice
 ```
 
 Open
-[about:debugging#/runtime/this-firefox](about:debugging#/runtime/this-firefox)
+[`about:debugging#/runtime/this-firefox`](about:debugging#/runtime/this-firefox)
 on Firefox in the development browser and click "Inspect" on the extension to
 debug the extension.
 
-## Features
-
-- Use modern Promise-based `browser.*` APIs [webextension-polyfill][link-webext-polyfill].
-- [Auto-publishing](#publishing) with auto-versioning and support for manual releases.
+<img width="998" alt="image" src="https://user-images.githubusercontent.com/14882297/221496246-4d27e256-b248-4e5c-bd55-b395977050a5.png">
 
 ### Publishing
 
