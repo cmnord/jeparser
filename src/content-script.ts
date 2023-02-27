@@ -232,8 +232,7 @@ class RoundParser {
 		for (const clue of this.clues) {
 			const categoryIdx = categories.get(clue.category);
 			if (categoryIdx !== undefined) {
-				const clueDict = {
-					category: clue.category,
+				const clueDict: Clue = {
 					value: clue.value,
 					clue: clue.clue,
 					answer: clue.answer!,
