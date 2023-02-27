@@ -1,5 +1,4 @@
 const path = require("path");
-const SizePlugin = require("size-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 
@@ -7,8 +6,8 @@ module.exports = {
 	devtool: "source-map",
 	stats: "errors-only",
 	entry: {
-		"content-script": "./source/content-script",
-		"popup/popup": "./source/popup/popup",
+		"content-script": "./src/content-script",
+		"popup/popup": "./src/popup/popup",
 	},
 	module: {
 		rules: [
@@ -20,19 +19,19 @@ module.exports = {
 		],
 	},
 	output: {
-		path: path.resolve(__dirname, "distribution"),
+		path: path.resolve(__dirname, "dist"),
 		filename: "[name].js",
 	},
 	resolve: {
 		extensions: [".ts", ".tsx", ".js"],
+		modules: ["./src", "./node_modules"],
 	},
 	plugins: [
-		new SizePlugin(),
 		new CopyPlugin({
 			patterns: [
 				{
+					context: "src",
 					from: "**/*",
-					context: "source",
 					globOptions: {
 						ignore: ["**/*.js", "**/*.ts", "**/*.tsx"],
 					},
