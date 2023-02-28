@@ -1,6 +1,6 @@
 {
 	"name": "jeparser",
-	"version": "0.1.1",
+	"version": "1.0.0",
 	"description": "Browser extension which downloads Jeopardy games from applets for offline solving.",
 	"homepage_url": "https://github.com/cmnord/jeparser",
 	"manifest_version": 2,
@@ -22,8 +22,13 @@
 	},
 	"content_scripts": [
 		{
-			"matches": ["*://j-archive.com/showgame.php*"],
-			"js": ["content-script.js", "browser-polyfill.min.js"],
+			"matches": [
+				"*://j-archive.com/showgame.php*"
+			],
+			"js": [
+				"content-script.js",
+				"browser-polyfill.min.js"
+			],
 			"run_at": "document_end"
 		}
 	]
