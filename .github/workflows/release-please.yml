@@ -10,4 +10,7 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         with:
           release-type: simple
+          command: manifest
           token: ${{ secrets.GITHUB_TOKEN }}
+          manifest-file: ".release-please-manifest.json"
+          config-file: "release-please-config.json"
