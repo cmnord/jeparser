@@ -8,27 +8,7 @@ env:
 name: Release
 on:
   workflow_dispatch: null
-jobs:
-  release-please:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: npm
-      - name: install
-        run: npm ci || npm install
-      - run: npm run build --if-present
-      - uses: google-github-actions/release-please-action@v3
-        with:
-          release-type: simple
-      - name: update manifest.json version from version.txt
-        run: >-
-          ls;
-          npx dot-json $DIRECTORY/manifest.json version $(cat version.txt)
   Submit:
-    needs: release-please
     if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
