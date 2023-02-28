@@ -5,7 +5,7 @@
 		"dev": "webpack --mode=development --watch",
 		"release:cws": "webstore upload --source=dist --auto-publish",
 		"release:amo": "web-ext-submit --source-dir dist",
-		"release": "VER=$(daily-version) run-s build version release:*",
+		"release": "VER=$(npx dot-json src/manifest.json version) run-s build version release:*",
 		"start:firefox": "web-ext run --source-dir dist",
 		"version": "dot-json dist/manifest.json version $VER"
 	},

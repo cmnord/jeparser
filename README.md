@@ -29,24 +29,23 @@ debug the extension.
 
 <img width="998" alt="image" src="https://user-images.githubusercontent.com/14882297/221496246-4d27e256-b248-4e5c-bd55-b395977050a5.png">
 
-### Publishing
+## Publishing
+
+This repository uses
+[release-please](https://github.com/googleapis/release-please) to manage
+releases.
 
 It's possible to publish to both the Chrome Web Store and Mozilla Addons at once by creating these ENV variables:
 
-1. `CLIENT_ID`, `CLIENT_SECRET`, and `REFRESH_TOKEN` from [Google APIs][link-cws-keys].
+1. `CLIENT_ID`, `CLIENT_SECRET`, and `REFRESH_TOKEN` from [Google
+  APIs][link-cws-keys].
 1. `WEB_EXT_API_KEY`, and `WEB_EXT_API_SECRET` from [AMO][link-amo-keys].
 
-And then running:
+Build the extension, then attempt to deploy it to both stores:
 
 ``` sh
 npm run release
 ```
-
-This will:
-
-1. Build the extension
-1. Create a version number based on version.txt
-1. Deploy it to both stores
 
 ## Thanks
 
