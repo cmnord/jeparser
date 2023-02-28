@@ -9,39 +9,8 @@ name: Release
 on:
   workflow_dispatch: null
 jobs:
-  Version:
-    outputs:
-      created: ${{ steps.daily-version.outputs.created }}
-      version: ${{ steps.daily-version.outputs.version }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 20
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: npm
-      - name: install
-        run: npm ci || npm install
-      - run: npm run build
-      - uses: fregante/daily-version-action@v2
-        name: Create tag if necessary
-        id: daily-version
-      - if: steps.daily-version.outputs.created
-        name: Create release
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: >
-            await github.request(`POST /repos/${{ github.repository
-            }}/releases`, {
-              tag_name: "${{ steps.daily-version.outputs.version }}",
-              generate_release_notes: true
-            });
   Submit:
-    needs: Version
-    if: github.event_name == 'workflow_dispatch' || needs.Version.outputs.created
+    if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
@@ -58,10 +27,6 @@ jobs:
       - name: install
         run: npm ci || npm install
       - run: npm run build --if-present
-      - name: Update extension's meta
-        run: >-
-          npx dot-json@1 $DIRECTORY/manifest.json version ${{
-          needs.Version.outputs.version }}
       - name: Submit
         run: |
           case ${{ matrix.command }} in

@@ -1,11 +1,11 @@
 {
 	"name": "jeparser",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"description": "",
 	"homepage_url": "https://github.com/cmnord/jeparser",
 	"manifest_version": 2,
 	"minimum_chrome_version": "74",
-	"applications": {
+	"browser_specific_settings": {
 		"gecko": {
 			"id": "jeparser@cmnord.github.io",
 			"strict_min_version": "67.0"
