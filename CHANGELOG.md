@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/cmnord/jeparser/compare/v1.0.0...v1.1.0) (2023-03-07)
+
+
+### Features
+
+* **src content-script:** remove HTML tags from answers ([20ce7ad](https://github.com/cmnord/jeparser/commit/20ce7adaf00278cd76cb1ffa9b62fe39fe9305d0))
+
 ## [1.0.0](https://github.com/cmnord/jeparser/compare/v0.0.1...v1.0.0) (2023-02-28)
 
 
