@@ -155,7 +155,9 @@ class FinalRoundParser {
 
 		const categoryDiv = roundDiv.querySelector(".category");
 		const mouseOverDiv = categoryDiv?.children[0];
-		this.answer = parseCorrectResponse(mouseOverDiv, "final jeopardy");
+		const answerHtml = parseCorrectResponse(mouseOverDiv, "final jeopardy");
+		// Remove HTML tags from the answer
+		this.answer = answerHtml.replace(/<[^>]*>/g, "");
 	}
 
 	jsonify() {
