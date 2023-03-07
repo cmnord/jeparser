@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0](https://github.com/cmnord/jeparser/compare/v1.1.0...v2.0.0) (2023-03-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **src manifest:** change AMO extension ID
+
+### Bug Fixes
+
+* **gitignore:** ignore .DS_Store ([2e044e8](https://github.com/cmnord/jeparser/commit/2e044e8d2932621295ff0bfe14e5a508e5ca0cfe))
+
+
+### Build System
+
+* **src manifest:** change AMO extension ID ([ebf2d07](https://github.com/cmnord/jeparser/commit/ebf2d07ab856b9becfd141b7f3481f61fdd21e38))
+
 ## [1.1.0](https://github.com/cmnord/jeparser/compare/v1.0.0...v1.1.0) (2023-03-07)
 
 
