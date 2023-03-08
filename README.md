@@ -1,6 +1,8 @@
 # Jeparser
 
-<img width="802" alt="image" src="https://user-images.githubusercontent.com/14882297/221532033-ac6259a8-2ea2-47af-8e44-1d444861ccf2.png">
+#### [[Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/jeparser/)]
+
+<img width="500" alt="image" src="https://user-images.githubusercontent.com/14882297/221532033-ac6259a8-2ea2-47af-8e44-1d444861ccf2.png">
 
 ## Development
 
@@ -27,7 +29,7 @@ Open
 on Firefox in the development browser and click "Inspect" on the extension to
 debug the extension.
 
-<img width="998" alt="image" src="https://user-images.githubusercontent.com/14882297/221496246-4d27e256-b248-4e5c-bd55-b395977050a5.png">
+<img width="500" alt="image" src="https://user-images.githubusercontent.com/14882297/221496246-4d27e256-b248-4e5c-bd55-b395977050a5.png">
 
 ## Publishing
 
