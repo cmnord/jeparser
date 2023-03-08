@@ -1,5 +1,7 @@
 # Jeparser
 
+![Mozilla Add-on version](https://img.shields.io/amo/v/jeparser@cmnord.github.com)
+
 #### [[Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/jeparser/)]
 
 <img width="500" alt="image" src="https://user-images.githubusercontent.com/14882297/221532033-ac6259a8-2ea2-47af-8e44-1d444861ccf2.png">
