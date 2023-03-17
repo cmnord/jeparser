@@ -22,6 +22,7 @@ interface Clue {
 	clue: string;
 	answer: string;
 	value: number;
+	wagerable?: boolean;
 }
 
 class NotFoundError extends Error {
@@ -75,7 +76,7 @@ export class GameParser {
 	constructor(document: Document) {
 		const title = document.querySelector("#game_title")?.textContent;
 		if (!title) {
-			throw new Error("could not find id game_title on page");
+			throw new NotFoundError("could not find id game_title on page");
 		}
 		this.title = title;
 
@@ -84,19 +85,21 @@ export class GameParser {
 
 		const jDiv = document.getElementById("jeopardy_round");
 		if (!jDiv) {
-			throw new Error("could not find id jeopardy_round on page");
+			throw new NotFoundError("could not find id jeopardy_round on page");
 		}
 		this.j = new RoundParser(jDiv);
 
 		const djDiv = document.getElementById("double_jeopardy_round");
 		if (!djDiv) {
-			throw new Error("could not find id double_jeopardy_round on page");
+			throw new NotFoundError(
+				"could not find id double_jeopardy_round on page"
+			);
 		}
 		this.dj = new RoundParser(djDiv);
 
 		const fjDiv = document.getElementById("final_jeopardy_round");
 		if (!fjDiv) {
-			throw new Error("could not find id final_jeopardy_round on page");
+			throw new NotFoundError("could not find id final_jeopardy_round on page");
 		}
 		this.fj = new FinalRoundParser(fjDiv);
 	}
@@ -141,12 +144,12 @@ class FinalRoundParser {
 	constructor(roundDiv: HTMLElement) {
 		const categoryName = roundDiv.querySelector(".category_name")?.textContent;
 		if (!categoryName) {
-			throw new Error("could not find class category_name on page");
+			throw new NotFoundError("could not find class category_name on page");
 		}
 		this.category = categoryName;
 		const clueText = roundDiv.querySelector(".clue_text")?.textContent;
 		if (!clueText) {
-			throw new Error("could not find class clue_text on page");
+			throw new NotFoundError("could not find class clue_text on page");
 		}
 		this.clue = clueText;
 
@@ -168,6 +171,7 @@ class FinalRoundParser {
 							clue: this.clue,
 							value: 0,
 							answer: this.answer,
+							wagerable: true,
 						},
 					],
 				},
@@ -235,6 +239,7 @@ class RoundParser {
 					value: clue.value,
 					clue: clue.clue,
 					answer: clue.answer,
+					wagerable: clue.wagerable,
 				};
 				jsonData.categories[categoryIdx].clues.push(clueDict);
 			}
@@ -248,7 +253,7 @@ class ClueParser {
 	category: string;
 	value: number;
 	answer: string;
-	isDailyDouble: boolean;
+	wagerable?: boolean;
 	i: number;
 	j: number;
 
@@ -256,31 +261,34 @@ class ClueParser {
 		this.i = i;
 		this.j = j;
 		// Identify Clue Text and Category
-		try {
-			const clue = clueDiv.querySelector(".clue_text")?.textContent;
-			if (!clue) {
-				throw new Error(
-					`could not find class clue_text on page for clue ${i}, ${j}`
-				);
-			}
-			this.clue = clue;
-		} catch (error: unknown) {
-			// AttributeError
-			this.clue = "Unrevealed";
-		}
+		const clue = clueDiv.querySelector(".clue_text")?.textContent;
+		this.clue = clue ?? "Unrevealed";
 		this.category = category;
 
 		// Find Clue Value
-		try {
-			const valueStr = clueDiv
-				.querySelector(".clue_value")
-				?.textContent?.slice(1);
-			this.value = parseInt(valueStr ?? "") || 0;
-			this.isDailyDouble = false;
-		} catch (error: unknown) {
-			// AttributeError
+		const clueValueText = clueDiv.querySelector(".clue_value")?.textContent;
+		const clueValueDDText = clueDiv.querySelector(
+			".clue_value_daily_double"
+		)?.textContent;
+
+		if (clueValueText) {
+			if (!clueValueText.startsWith("$")) {
+				throw new Error("clue value does not start with '$'");
+			}
+			const clueValue = parseInt(clueValueText.slice(1));
+			if (isNaN(clueValue)) {
+				throw new Error("could not parse clue value " + clueValueText);
+			}
+			this.value = clueValue;
+		} else if (clueValueDDText) {
+			if (!clueValueDDText.startsWith("DD: $")) {
+				throw new Error("DD clue value does not start with 'DD: $'");
+			}
 			this.value = 0;
-			this.isDailyDouble = true;
+			this.wagerable = true;
+		} else {
+			// Unrevealed
+			this.value = 0;
 		}
 
 		const mouseOverDiv =
