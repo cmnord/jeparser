@@ -80,10 +80,7 @@ export class GameParser {
 		this.title = title;
 
 		const note = document.querySelector("#game_comments")?.textContent;
-		if (!note) {
-			throw new Error("could not find id game_comments on page");
-		}
-		this.note = note;
+		this.note = note ?? "";
 
 		const jDiv = document.getElementById("jeopardy_round");
 		if (!jDiv) {
