@@ -167,7 +167,7 @@ class FinalRoundParser {
 						{
 							clue: this.clue,
 							value: 0,
-							answer: this.answer!,
+							answer: this.answer,
 						},
 					],
 				},
@@ -234,7 +234,7 @@ class RoundParser {
 				const clueDict: Clue = {
 					value: clue.value,
 					clue: clue.clue,
-					answer: clue.answer!,
+					answer: clue.answer,
 				};
 				jsonData.categories[categoryIdx].clues.push(clueDict);
 			}
@@ -286,8 +286,9 @@ class ClueParser {
 		const mouseOverDiv =
 			clueDiv.children[0]?.children[0]?.children[0]?.children[0]?.children[0];
 		try {
-			const answer = parseCorrectResponse(mouseOverDiv, `clue ${i}, ${j}`);
-			this.answer = answer;
+			const answerHtml = parseCorrectResponse(mouseOverDiv, `clue ${i}, ${j}`);
+			// Remove HTML tags from the answer
+			this.answer = answerHtml.replace(/<[^>]*>/g, "");
 		} catch (error: unknown) {
 			if (isNotFoundError(error)) {
 				this.answer = "Unrevealed";
