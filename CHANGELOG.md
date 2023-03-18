@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1.0](https://github.com/cmnord/jeparser/compare/v2.0.0...v2.1.0) (2023-03-18)
+
+
+### Features
+
+* **src content-script:** optional `wagerable` property on clue ([f686e0e](https://github.com/cmnord/jeparser/commit/f686e0ec1242fd8cf1fc4cd9fbe841892d8ae5a4))
+
+
+### Bug Fixes
+
+* **src content-script:** make note optional ([381cb43](https://github.com/cmnord/jeparser/commit/381cb43b417a58f01496a5a962174c9583709a7e))
+* **src content-script:** remove HTML tags from all answers ([4bf5687](https://github.com/cmnord/jeparser/commit/4bf5687008aac5d91183e14ecda0966eb20c4dbb))
+
 ## [2.0.0](https://github.com/cmnord/jeparser/compare/v1.1.0...v2.0.0) (2023-03-07)
 
 
