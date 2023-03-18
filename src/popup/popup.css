@@ -2,7 +2,23 @@ html,
 body {
 	min-width: 550px;
 	font-family: arial, verdana, helvetica, sans-serif;
-	background-color: #00003a;
+
+	--red-100: #fee2e2;
+	--red-700: #b91c1c;
+
+	--yellow-1: #fab85b;
+
+	--blue-1: #0000ff;
+	--blue-2: #0000ee;
+	--blue-3: #0000af;
+	--blue-4: #000099;
+	--blue-5: #000088;
+	--blue-6: #00003a;
+
+	--gray-100: #f3f4f6;
+	--gray-700: #374151;
+
+	background-color: var(--blue-6);
 }
 
 .body {
@@ -19,7 +35,7 @@ body {
 }
 
 .link {
-	color: #fab85b;
+	color: var(--yellow-1);
 	font-size: small;
 }
 
@@ -39,19 +55,20 @@ body {
 
 	border-width: 2px;
 	border-style: outset;
-	border-bottom-color: #000088;
-	border-left-color: #0000ee;
-	border-right-color: #000099;
-	border-top-color: #0000ff;
 
-	background: #0000af;
-	color: #fff;
+	border-top-color: var(--blue-1);
+	border-left-color: var(--blue-2);
+	background: var(--blue-3);
+	border-right-color: var(--blue-4);
+	border-bottom-color: var(--blue-5);
+
+	color: white;
 	transition: color 0.2s, background 0.2s;
 }
 
 .button:hover {
-	background: #000088;
-	color: #fff;
+	background: var(--blue-4);
+	color: white;
 	cursor: pointer;
 }
 
@@ -64,7 +81,8 @@ body {
 	overflow: auto;
 	padding: 2em;
 	margin: 0 1em;
-	background: lightgray;
+	color: var(--gray-700);
+	background: var(--gray-100);
 	border-radius: 1em;
 	tab-size: 1em;
 	font-size: small;
@@ -74,8 +92,8 @@ body {
 	padding: 2em;
 	margin: 0 1em;
 	border-radius: 1em;
-	background: lightpink;
-	color: darkred;
+	background: var(--red-100);
+	color: var(--red-700);
 	font-family: monospace;
 }
 
