@@ -22,7 +22,14 @@ interface Clue {
 	clue: string;
 	answer: string;
 	value: number;
+	/** wagerable clues allow players to wager on the answer and win or lose that
+	 * value instead of the clue's value.
+	 */
 	wagerable?: boolean;
+	/** longForm means that all players may write down their answers to this clue
+	 * over a longer time period instead of competing to buzz in.
+	 */
+	longForm?: boolean;
 }
 
 class NotFoundError extends Error {
@@ -180,6 +187,7 @@ class FinalRoundParser {
 							value: 0,
 							answer: this.answer,
 							wagerable: true,
+							longForm: true,
 						},
 					],
 				},
