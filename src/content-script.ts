@@ -65,6 +65,14 @@ function parseGame() {
 	return { game: null, error: "unknown error" };
 }
 
+/** getExpectedClueValue gets the expected clue value based on its position in
+ * the board before revealing it. Otherwise, the clue value for wagerable or
+ * unrevealed clues would be 0.
+ */
+function getExpectedClueValue(i: number, round: number) {
+	return (i + 1) * 200 * (round + 1);
+}
+
 // Classes based on https://glitch.com/~jarchive-json
 export class GameParser {
 	private title: string;
@@ -87,7 +95,7 @@ export class GameParser {
 		if (!jDiv) {
 			throw new NotFoundError("could not find id jeopardy_round on page");
 		}
-		this.j = new RoundParser(jDiv);
+		this.j = new RoundParser(jDiv, 0);
 
 		const djDiv = document.getElementById("double_jeopardy_round");
 		if (!djDiv) {
@@ -95,7 +103,7 @@ export class GameParser {
 				"could not find id double_jeopardy_round on page"
 			);
 		}
-		this.dj = new RoundParser(djDiv);
+		this.dj = new RoundParser(djDiv, 1);
 
 		const fjDiv = document.getElementById("final_jeopardy_round");
 		if (!fjDiv) {
@@ -185,7 +193,7 @@ class RoundParser {
 	private categories: string[];
 	private clues: ClueParser[];
 
-	constructor(roundDiv: HTMLElement) {
+	constructor(roundDiv: HTMLElement, round: number) {
 		// Identify the Categories
 		const categoryDivs = roundDiv.getElementsByClassName("category_name"); // TODO: also td?
 		this.categories = [];
@@ -199,11 +207,14 @@ class RoundParser {
 		this.clues = [];
 		let row = 0;
 		for (const clue of clueDivs) {
-			this.clues.push(new ClueParser(clue, this.categories[col], row, col));
+			this.clues.push(
+				new ClueParser(clue, this.categories[col], row, col, round)
+			);
 			col += 1;
-			row += 1;
-			if (col > 5) col = 0;
-			if (row > 4) row = 0;
+			if (col > 5) {
+				col = 0;
+				row += 1;
+			}
 		}
 	}
 
@@ -257,7 +268,13 @@ class ClueParser {
 	i: number;
 	j: number;
 
-	constructor(clueDiv: Element, category: string, i: number, j: number) {
+	constructor(
+		clueDiv: Element,
+		category: string,
+		i: number,
+		j: number,
+		round: number
+	) {
 		this.i = i;
 		this.j = j;
 		// Identify Clue Text and Category
@@ -284,11 +301,11 @@ class ClueParser {
 			if (!clueValueDDText.startsWith("DD: $")) {
 				throw new Error("DD clue value does not start with 'DD: $'");
 			}
-			this.value = 0;
+			this.value = getExpectedClueValue(i, round);
 			this.wagerable = true;
 		} else {
 			// Unrevealed
-			this.value = 0;
+			this.value = getExpectedClueValue(i, round);
 		}
 
 		const mouseOverDiv =
