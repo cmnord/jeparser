@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0](https://github.com/cmnord/jeparser/compare/v2.1.0...v2.2.0) (2023-03-24)
+
+
+### Features
+
+* **src content-script:** get expected clue value for DD, unreveal ([46298c5](https://github.com/cmnord/jeparser/commit/46298c5b8cc860a0b0fdf501e334a60f4afcafbe))
+* **src content-script:** mark final clues as long-form ([841b7f8](https://github.com/cmnord/jeparser/commit/841b7f89cc6169efea84cf05cce47aeac412f2ac))
+
 ## [2.1.0](https://github.com/cmnord/jeparser/compare/v2.0.0...v2.1.0) (2023-03-18)
 
 
