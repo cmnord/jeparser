@@ -58,7 +58,8 @@ browser.runtime.onMessage.addListener(
 );
 
 /** parseGame parses the j-archive website and returns a representation of the
- * game in JSON. */
+ * game in JSON.
+ */
 function parseGame() {
 	try {
 		const gameParser = new GameParser(document);
@@ -84,9 +85,9 @@ function getExpectedClueValue(i: number, round: number) {
 export class GameParser {
 	private title: string;
 	private note: string;
-	private j: RoundParser;
-	private dj: RoundParser;
-	private fj: FinalRoundParser;
+	private j: BoardParser;
+	private dj: BoardParser;
+	private fj: FinalBoardParser;
 
 	constructor(document: Document) {
 		const title = document.querySelector("#game_title")?.textContent;
@@ -102,7 +103,7 @@ export class GameParser {
 		if (!jDiv) {
 			throw new NotFoundError("could not find id jeopardy_round on page");
 		}
-		this.j = new RoundParser(jDiv, 0);
+		this.j = new BoardParser(jDiv, 0);
 
 		const djDiv = document.getElementById("double_jeopardy_round");
 		if (!djDiv) {
@@ -110,13 +111,13 @@ export class GameParser {
 				"could not find id double_jeopardy_round on page"
 			);
 		}
-		this.dj = new RoundParser(djDiv, 1);
+		this.dj = new BoardParser(djDiv, 1);
 
 		const fjDiv = document.getElementById("final_jeopardy_round");
 		if (!fjDiv) {
 			throw new NotFoundError("could not find id final_jeopardy_round on page");
 		}
-		this.fj = new FinalRoundParser(fjDiv);
+		this.fj = new FinalBoardParser(fjDiv);
 	}
 
 	jsonify(): Game {
@@ -151,7 +152,7 @@ function parseCorrectResponse(hoverElement: Element | undefined, name: string) {
 	throw new NotFoundError("could not find correct response in element " + name);
 }
 
-class FinalRoundParser {
+class FinalBoardParser {
 	private category: string;
 	private clue: string;
 	private answer: string;
@@ -197,27 +198,30 @@ class FinalRoundParser {
 	}
 }
 
-class RoundParser {
-	private categories: string[];
-	private clues: ClueParser[];
+class BoardParser {
+	private categories: {
+		name: string;
+		clues: ClueParser[];
+	}[];
 
 	constructor(roundDiv: HTMLElement, round: number) {
 		// Identify the Categories
-		const categoryDivs = roundDiv.getElementsByClassName("category_name"); // TODO: also td?
+		const categoryDivs = roundDiv.getElementsByClassName("category_name");
 		this.categories = [];
 		for (const cat of categoryDivs) {
-			this.categories.push(cat.textContent || "");
+			this.categories.push({
+				name: cat.textContent || "",
+				clues: [],
+			});
 		}
 
 		// Pull Clues
 		let col = 0;
-		const clueDivs = roundDiv.getElementsByClassName("clue"); // TODO: also td?
-		this.clues = [];
+		const clueDivs = roundDiv.getElementsByClassName("clue");
 		let row = 0;
-		for (const clue of clueDivs) {
-			this.clues.push(
-				new ClueParser(clue, this.categories[col], row, col, round)
-			);
+		for (const clueDiv of clueDivs) {
+			const category = this.categories[col];
+			category.clues.push(new ClueParser(clueDiv, row, col, round));
 			col += 1;
 			if (col > 5) {
 				col = 0;
@@ -226,69 +230,32 @@ class RoundParser {
 		}
 	}
 
-	getCategories() {
-		const categories = new Map<string, number>();
-
-		let numCategories = 0;
-		for (const clue of this.clues) {
-			if (!categories.has(clue.category)) {
-				categories.set(clue.category, numCategories);
-				numCategories++;
-			}
-		}
-
-		return categories;
-	}
-
 	jsonify(): Board {
-		const categories = this.getCategories();
-
-		const jsonData: Board = {
-			categoryNames: this.categories,
-			categories: this.categories.map((c) => ({
-				name: c,
-				clues: [],
+		const categoryNames = this.categories.map((cat) => cat.name);
+		return {
+			categoryNames,
+			categories: this.categories.map((cat) => ({
+				name: cat.name,
+				clues: cat.clues.map((clue) => clue.jsonify()),
 			})),
 		};
-
-		for (const clue of this.clues) {
-			const categoryIdx = categories.get(clue.category);
-			if (categoryIdx !== undefined) {
-				const clueDict: Clue = {
-					value: clue.value,
-					clue: clue.clue,
-					answer: clue.answer,
-					wagerable: clue.wagerable,
-				};
-				jsonData.categories[categoryIdx].clues.push(clueDict);
-			}
-		}
-		return jsonData;
 	}
 }
 
 class ClueParser {
 	clue: string;
-	category: string;
 	value: number;
 	answer: string;
 	wagerable?: boolean;
 	i: number;
 	j: number;
 
-	constructor(
-		clueDiv: Element,
-		category: string,
-		i: number,
-		j: number,
-		round: number
-	) {
+	constructor(clueDiv: Element, i: number, j: number, round: number) {
 		this.i = i;
 		this.j = j;
-		// Identify Clue Text and Category
+		// Identify Clue Text
 		const clue = clueDiv.querySelector(".clue_text")?.textContent;
 		this.clue = clue ?? "Unrevealed";
-		this.category = category;
 
 		// Find Clue Value
 		const clueValueText = clueDiv.querySelector(".clue_value")?.textContent;
@@ -329,6 +296,15 @@ class ClueParser {
 				throw error;
 			}
 		}
+	}
+
+	jsonify(): Clue {
+		return {
+			clue: this.clue,
+			answer: this.answer,
+			value: this.value,
+			wagerable: this.wagerable,
+		};
 	}
 }
 
