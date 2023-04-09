@@ -1,5 +1,8 @@
 # Jeparser
 
+Jeparser is a browser extension which downloads Jeopardy games for offline
+solving. It downloads the game into a JSON file.
+
 ![Mozilla Add-on version](https://img.shields.io/amo/v/jeparser@cmnord.github.com)
 
 #### [[Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/jeparser/)]
@@ -39,7 +42,8 @@ This repository uses
 [release-please](https://github.com/googleapis/release-please) to manage
 releases.
 
-It's possible to publish to both the Chrome Web Store and Mozilla Addons at once by creating these ENV variables:
+It's possible to publish to both the Chrome Web Store and Mozilla Addons at once
+by creating these ENV variables:
 
 1. `CLIENT_ID`, `CLIENT_SECRET`, and `REFRESH_TOKEN` from [Google
   APIs][link-cws-keys].
