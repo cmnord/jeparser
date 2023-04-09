@@ -15,6 +15,7 @@ interface Board {
 
 interface Category {
 	name: string;
+	note: string;
 	clues: Clue[];
 }
 
@@ -182,6 +183,7 @@ class FinalBoardParser {
 			categories: [
 				{
 					name: this.category,
+					note: "",
 					clues: [
 						{
 							clue: this.clue,
@@ -201,18 +203,33 @@ class FinalBoardParser {
 class BoardParser {
 	private categories: {
 		name: string;
+		note: string;
 		clues: ClueParser[];
 	}[];
 
 	constructor(roundDiv: HTMLElement, round: number) {
-		// Identify the Categories
-		const categoryDivs = roundDiv.getElementsByClassName("category_name");
-		this.categories = [];
-		for (const cat of categoryDivs) {
-			this.categories.push({
-				name: cat.textContent || "",
+		const categoryDivs = roundDiv.getElementsByClassName("category");
+		this.categories = new Array(categoryDivs.length);
+
+		for (let i = 0; i < categoryDivs.length; i++) {
+			const categoryDiv = categoryDivs[i];
+			const categoryName =
+				categoryDiv.querySelector(".category_name")?.textContent;
+			if (!categoryName) {
+				throw new NotFoundError(
+					`could not find class category_name in category ${i} round ${round}`
+				);
+			}
+			let note = categoryDiv.querySelector(".category_comments")?.textContent;
+			if (note) {
+				// Change (Speaker: <note>) to <note>
+				note = note.replace(/\(\w+: (.*)\)/, "$1");
+			}
+			this.categories[i] = {
+				name: categoryName,
+				note: note ?? "",
 				clues: [],
-			});
+			};
 		}
 
 		// Pull Clues
@@ -220,8 +237,7 @@ class BoardParser {
 		const clueDivs = roundDiv.getElementsByClassName("clue");
 		let row = 0;
 		for (const clueDiv of clueDivs) {
-			const category = this.categories[col];
-			category.clues.push(new ClueParser(clueDiv, row, col, round));
+			this.categories[col].clues.push(new ClueParser(clueDiv, row, col, round));
 			col += 1;
 			if (col > 5) {
 				col = 0;
@@ -236,6 +252,7 @@ class BoardParser {
 			categoryNames,
 			categories: this.categories.map((cat) => ({
 				name: cat.name,
+				note: cat.note,
 				clues: cat.clues.map((clue) => clue.jsonify()),
 			})),
 		};
