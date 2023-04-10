@@ -4,10 +4,11 @@
 	"scripts": {
 		"build": "webpack --mode=production",
 		"dev": "webpack --mode=development --watch",
-		"release:cws": "webstore upload --source=dist --auto-publish",
+		"release:cws": "chrome-webstore-upload upload --source=dist --auto-publish",
 		"release:amo": "web-ext-submit --source-dir dist",
 		"release": "VER=$(npx dot-json src/manifest.json version) run-s build version release:*",
 		"start:firefox": "web-ext run --source-dir dist",
+		"start:chrome": "web-ext run --source-dir dist -t chromium",
 		"version": "dot-json dist/manifest.json version $VER"
 	},
 	"devDependencies": {
