@@ -144,11 +144,14 @@ function parseCorrectResponse(hoverElement: Element | undefined, name: string) {
 	const start = mouseOverAttribute.indexOf(CORRECT_RESPONSE_PREFIX);
 	const end = mouseOverAttribute.indexOf(CORRECT_RESPONSE_SUFFIX);
 	if (start !== undefined && start !== -1 && end !== undefined && end !== -1) {
-		const correctResponse = mouseOverAttribute.substring(
+		const responseHtml = mouseOverAttribute.substring(
 			start + CORRECT_RESPONSE_PREFIX.length,
 			end
 		);
-		return correctResponse;
+		// Remove HTML tags
+		const responseStr = responseHtml.replace(/<[^>]*>/g, "");
+		// Replace backslash-escaped quotes
+		return responseStr.replace(/\\'/g, "'");
 	}
 	throw new NotFoundError("could not find correct response in element " + name);
 }
@@ -172,9 +175,7 @@ class FinalBoardParser {
 
 		const categoryDiv = roundDiv.querySelector(".category");
 		const mouseOverDiv = categoryDiv?.children[0];
-		const answerHtml = parseCorrectResponse(mouseOverDiv, "final jeopardy");
-		// Remove HTML tags from the answer
-		this.answer = answerHtml.replace(/<[^>]*>/g, "");
+		this.answer = parseCorrectResponse(mouseOverDiv, "final jeopardy");
 	}
 
 	jsonify() {
@@ -303,9 +304,7 @@ class ClueParser {
 		const mouseOverDiv =
 			clueDiv.children[0]?.children[0]?.children[0]?.children[0]?.children[0];
 		try {
-			const answerHtml = parseCorrectResponse(mouseOverDiv, `clue ${i}, ${j}`);
-			// Remove HTML tags from the answer
-			this.answer = answerHtml.replace(/<[^>]*>/g, "");
+			this.answer = parseCorrectResponse(mouseOverDiv, `clue ${i}, ${j}`);
 		} catch (error: unknown) {
 			if (isNotFoundError(error)) {
 				this.answer = "Unrevealed";
