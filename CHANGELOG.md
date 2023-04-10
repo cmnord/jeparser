@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/cmnord/jeparser/compare/v3.0.0...v3.0.1) (2023-04-10)
+
+
+### Bug Fixes
+
+* **src manifest:** update minimum chrome version for manifest v3 ([2cc0290](https://github.com/cmnord/jeparser/commit/2cc02905219f48641223237ee8018bdc948c7476))
+
 ## [3.0.0](https://github.com/cmnord/jeparser/compare/v2.3.0...v3.0.0) (2023-04-10)
 
 
