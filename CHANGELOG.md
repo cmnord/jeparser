@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.0](https://github.com/cmnord/jeparser/compare/v2.2.0...v2.3.0) (2023-04-10)
+
+
+### Features
+
+* **src content-script:** add category notes ([709468d](https://github.com/cmnord/jeparser/commit/709468de420fe902080917c2ec8b27656e6f54bb))
+* **src content-script:** remove `\` escape from single quotes ([e1ddfe7](https://github.com/cmnord/jeparser/commit/e1ddfe7c962c88141f5a954f382ef24996f9b0ca))
+
 ## [2.2.0](https://github.com/cmnord/jeparser/compare/v2.1.0...v2.2.0) (2023-03-24)
 
 
