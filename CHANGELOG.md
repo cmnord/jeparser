@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/cmnord/jeparser/compare/v2.3.0...v3.0.0) (2023-04-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **src manifest:** migrate to manifest v3
+
+### Build System
+
+* **src manifest:** migrate to manifest v3 ([928a1f6](https://github.com/cmnord/jeparser/commit/928a1f67659680383b0ca9eb29702e8d3a527d87))
+
 ## [2.3.0](https://github.com/cmnord/jeparser/compare/v2.2.0...v2.3.0) (2023-04-10)
 
 
