@@ -4,8 +4,9 @@ Jeparser is a browser extension which downloads Jeopardy games for offline
 solving. It downloads the game into a JSON file.
 
 ![Mozilla Add-on version](https://img.shields.io/amo/v/jeparser@cmnord.github.com)
+![Chrome Web Store version](https://img.shields.io/chrome-web-store/v/fmnjhgdgfkjhfnkeeafhjgdjinnnmeip)
 
-#### [[Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/jeparser/)]
+#### [[Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/jeparser/)] [[Download for Chrome](https://chrome.google.com/webstore/detail/jeparser/fmnjhgdgfkjhfnkeeafhjgdjinnnmeip)]
 
 <img width="500" alt="image" src="https://user-images.githubusercontent.com/14882297/221532033-ac6259a8-2ea2-47af-8e44-1d444861ccf2.png">
 
@@ -52,12 +53,12 @@ It's possible to publish to both the Chrome Web Store and Mozilla Addons at once
 by creating these ENV variables:
 
 1. `EXTENSION_ID`, `CLIENT_ID`, `CLIENT_SECRET`, and `REFRESH_TOKEN` from
-  [Google APIs][link-cws-keys].
+   [Google APIs][link-cws-keys].
 1. `WEB_EXT_API_KEY`, and `WEB_EXT_API_SECRET` from [AMO][link-amo-keys].
 
 Build the extension, then attempt to deploy it to both stores:
 
-``` sh
+```sh
 npm run release
 ```
 
