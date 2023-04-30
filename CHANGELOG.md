@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/cmnord/jeparser/compare/v3.0.1...v3.0.2) (2023-04-30)
+
+
+### Bug Fixes
+
+* **src:** fix answer parsing, optimistically return game ([a698d5a](https://github.com/cmnord/jeparser/commit/a698d5a33090d6b1b79fbfe97880c00906ff4556))
+
 ## [3.0.1](https://github.com/cmnord/jeparser/compare/v3.0.0...v3.0.1) (2023-04-10)
 
 
