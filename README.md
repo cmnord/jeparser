@@ -41,7 +41,7 @@ Open
 on Firefox in the development browser and click "Inspect" on the extension to
 debug the extension.
 
-<img width="500" alt="image" src="https://user-images.githubusercontent.com/14882297/221496246-4d27e256-b248-4e5c-bd55-b395977050a5.png">
+![screenshot](/screenshot_1280x800.png)
 
 ## Publishing
 
