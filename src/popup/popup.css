@@ -97,6 +97,10 @@ body {
 	font-family: monospace;
 }
 
+.error-content:not(.hidden) {
+	margin-bottom: 1em;
+}
+
 /* Firefox only */
 .only-firefox {
 	display: none;

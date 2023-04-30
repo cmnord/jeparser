@@ -3,7 +3,7 @@ import browser from "webextension-polyfill";
 import { Game } from "src/content-script";
 
 interface Response {
-	game: Game | null;
+	game: Game;
 	error?: string;
 }
 
@@ -12,8 +12,9 @@ const CONTENT_SCRIPT_PERMISSION_ERROR =
 
 async function main() {
 	try {
-		const game = await requestGame();
+		const { game, error } = await requestGame();
 		showGame(game);
+		reportExecuteScriptError(error);
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			reportExecuteScriptError(error.message);
@@ -34,14 +35,7 @@ async function requestGame() {
 		const response: Response = await browser.tabs.sendMessage(tabId, {
 			message: "parse",
 		});
-		const game = response.game;
-		if (response.error) {
-			throw new Error(response.error);
-		}
-		if (!game) {
-			throw new Error("game missing from response");
-		}
-		return game;
+		return response;
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			if (error.message === CONTENT_SCRIPT_PERMISSION_ERROR) {
@@ -53,15 +47,21 @@ async function requestGame() {
 	}
 }
 
-/** There was an error executing the script.  Display the popup's error message,
- * and hide the normal UI. */
-function reportExecuteScriptError(error: string) {
-	document.querySelector("#popup-content")?.classList.add("hidden");
+/** There was an error executing the script. Display the popup's error message.
+ */
+function reportExecuteScriptError(error?: string) {
 	const errorDiv = document.querySelector("#error-content");
-	if (errorDiv) {
-		errorDiv.classList.remove("hidden");
-		errorDiv.textContent = error;
+	if (!errorDiv) {
+		throw new Error("could not find error element");
 	}
+
+	if (!error) {
+		errorDiv.classList.add("hidden");
+		return;
+	}
+
+	errorDiv.classList.remove("hidden");
+	errorDiv.textContent = error;
 	console.error(`Failed to execute content script: ${error}`);
 }
 
@@ -70,10 +70,11 @@ function reportExecuteScriptError(error: string) {
 function showGame(game: Game) {
 	const stringifiedGame = JSON.stringify(game, null, "\t");
 	const gameElement = document.querySelector("#game");
-	if (gameElement) {
-		gameElement.classList.remove("hidden");
-		gameElement.textContent = stringifiedGame;
+	if (!gameElement) {
+		throw new Error("could not find game element");
 	}
+
+	gameElement.textContent = stringifiedGame;
 	const downloadLink = document.querySelector("#download-link");
 	if (downloadLink) {
 		downloadLink.setAttribute(

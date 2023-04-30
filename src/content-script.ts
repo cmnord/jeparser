@@ -33,19 +33,8 @@ interface Clue {
 	longForm?: boolean;
 }
 
-class NotFoundError extends Error {
-	constructor(message?: string) {
-		super(message);
-		this.name = "NotFoundError";
-	}
-}
-
-function isNotFoundError(error: unknown): error is NotFoundError {
-	return error instanceof Error && error.name === "NotFoundError";
-}
-
-const CORRECT_RESPONSE_PREFIX = '<em class="correct_response">';
-const CORRECT_RESPONSE_SUFFIX = "</em>";
+/** ERROR_PLACEHOLDER is used when a field has an error. */
+const ERROR_PLACEHOLDER = "***ERROR***";
 
 // On a message from the popup script, the content script parses the body of the
 // page and returns it to the client in JSON form.
@@ -58,20 +47,17 @@ browser.runtime.onMessage.addListener(
 	}
 );
 
+interface Response {
+	game: Game;
+	error?: string;
+}
+
 /** parseGame parses the j-archive website and returns a representation of the
  * game in JSON.
  */
 function parseGame() {
-	try {
-		const gameParser = new GameParser(document);
-		const game = gameParser.jsonify();
-		return { game, error: "" };
-	} catch (error: unknown) {
-		if (error instanceof Error) {
-			return { game: null, error: error.message };
-		}
-	}
-	return { game: null, error: "unknown error" };
+	const gameParser = new GameParser(document);
+	return gameParser.jsonify();
 }
 
 /** getExpectedClueValue gets the expected clue value based on its position in
@@ -89,97 +75,103 @@ export class GameParser {
 	private j: BoardParser;
 	private dj: BoardParser;
 	private fj: FinalBoardParser;
+	private errors: string[];
 
 	constructor(document: Document) {
+		this.errors = [];
+
 		const title = document.querySelector("#game_title")?.textContent;
 		if (!title) {
-			throw new NotFoundError("could not find id game_title on page");
+			this.errors.push("could not find id game_title on page");
+			this.title = ERROR_PLACEHOLDER;
+		} else {
+			this.title = title;
 		}
-		this.title = title;
 
 		const note = document.querySelector("#game_comments")?.textContent;
 		this.note = note ?? "";
 
 		const jDiv = document.getElementById("jeopardy_round");
-		if (!jDiv) {
-			throw new NotFoundError("could not find id jeopardy_round on page");
-		}
-		this.j = new BoardParser(jDiv, 0);
+		this.j = new BoardParser(0, jDiv);
 
 		const djDiv = document.getElementById("double_jeopardy_round");
-		if (!djDiv) {
-			throw new NotFoundError(
-				"could not find id double_jeopardy_round on page"
-			);
-		}
-		this.dj = new BoardParser(djDiv, 1);
+		this.dj = new BoardParser(1, djDiv);
 
 		const fjDiv = document.getElementById("final_jeopardy_round");
-		if (!fjDiv) {
-			throw new NotFoundError("could not find id final_jeopardy_round on page");
-		}
 		this.fj = new FinalBoardParser(fjDiv);
 	}
 
-	jsonify(): Game {
-		return {
+	jsonify(): Response {
+		const { board: jBoard, error: jError } = this.j.jsonify();
+		const { board: djBoard, error: djError } = this.dj.jsonify();
+		const { board: fjBoard, error: fjError } = this.fj.jsonify();
+
+		const game: Game = {
 			title: this.title,
 			author: "J! Archive",
 			copyright: "Jeopardy!",
 			note: this.note,
-			boards: [this.j.jsonify(), this.dj.jsonify(), this.fj.jsonify()],
+			boards: [jBoard, djBoard, fjBoard],
 		};
+
+		const errors = [...this.errors, jError, djError, fjError].filter(
+			(e): e is string => e !== undefined
+		);
+		const error = errors.length ? errors.join("\n") : undefined;
+		return { game, error };
 	}
 }
 
 /** parseCorrectResponse parses the onmouseover attribute of the clue header
  * element to find the correct response. */
-function parseCorrectResponse(hoverElement: Element | undefined, name: string) {
-	const mouseOverAttribute = hoverElement?.getAttribute("onmouseover");
-	if (!mouseOverAttribute) {
-		throw new NotFoundError(
-			"could not find onmouseover attribute inside element " + name
-		);
-	}
-	const start = mouseOverAttribute.indexOf(CORRECT_RESPONSE_PREFIX);
-	const end = mouseOverAttribute.indexOf(CORRECT_RESPONSE_SUFFIX);
-	if (start !== undefined && start !== -1 && end !== undefined && end !== -1) {
-		const responseHtml = mouseOverAttribute.substring(
-			start + CORRECT_RESPONSE_PREFIX.length,
-			end
-		);
-		// Remove HTML tags
-		const responseStr = responseHtml.replace(/<[^>]*>/g, "");
-		// Replace backslash-escaped quotes
-		return responseStr.replace(/\\'/g, "'");
-	}
-	throw new NotFoundError("could not find correct response in element " + name);
+function parseCorrectResponse(answerText: string) {
+	// Remove HTML tags
+	const responseStr = answerText.replace(/<[^>]*>/g, "");
+	// Replace backslash-escaped quotes
+	return responseStr.replace(/\\'/g, "'");
 }
 
 class FinalBoardParser {
 	private category: string;
 	private clue: string;
 	private answer: string;
+	private errors: string[];
 
-	constructor(roundDiv: HTMLElement) {
-		const categoryName = roundDiv.querySelector(".category_name")?.textContent;
+	constructor(roundDiv: HTMLElement | null) {
+		this.errors = [];
+
+		if (!roundDiv) {
+			this.errors.push("could not find final jeopardy round on page");
+		}
+
+		const categoryName = roundDiv?.querySelector(".category_name")?.textContent;
 		if (!categoryName) {
-			throw new NotFoundError("could not find class category_name on page");
+			this.errors.push("could not find class category_name on page");
+			this.category = ERROR_PLACEHOLDER;
+		} else {
+			this.category = categoryName;
 		}
-		this.category = categoryName;
-		const clueText = roundDiv.querySelector(".clue_text")?.textContent;
-		if (!clueText) {
-			throw new NotFoundError("could not find class clue_text on page");
-		}
-		this.clue = clueText;
 
-		const categoryDiv = roundDiv.querySelector(".category");
-		const mouseOverDiv = categoryDiv?.children[0];
-		this.answer = parseCorrectResponse(mouseOverDiv, "final jeopardy");
+		const clueText = roundDiv?.querySelector(".clue_text")?.textContent;
+		if (!clueText) {
+			this.errors.push("could not find class clue_text on page");
+			this.clue = ERROR_PLACEHOLDER;
+		} else {
+			this.clue = clueText;
+		}
+
+		const answerText =
+			roundDiv?.querySelector(".correct_response")?.textContent;
+		if (!answerText) {
+			this.errors.push("could not find class correct_response in final round");
+			this.answer = ERROR_PLACEHOLDER;
+		} else {
+			this.answer = parseCorrectResponse(answerText);
+		}
 	}
 
-	jsonify() {
-		const jsonData: Board = {
+	jsonify(): { board: Board; error?: string } {
+		const board: Board = {
 			categoryNames: [this.category],
 			categories: [
 				{
@@ -197,7 +189,8 @@ class FinalBoardParser {
 				},
 			],
 		};
-		return jsonData;
+		const error = this.errors.length ? this.errors.join("\n") : undefined;
+		return { board, error };
 	}
 }
 
@@ -207,27 +200,42 @@ class BoardParser {
 		note: string;
 		clues: ClueParser[];
 	}[];
+	private errors: string[];
 
-	constructor(roundDiv: HTMLElement, round: number) {
-		const categoryDivs = roundDiv.getElementsByClassName("category");
+	constructor(round: number, roundDiv: HTMLElement | null) {
+		this.errors = [];
+
+		if (!roundDiv) {
+			this.errors.push("could not find round " + round + " on page");
+		}
+		const categoryDivs = roundDiv
+			? roundDiv.getElementsByClassName("category")
+			: [];
 		this.categories = new Array(categoryDivs.length);
 
 		for (let i = 0; i < categoryDivs.length; i++) {
 			const categoryDiv = categoryDivs[i];
 			const categoryName =
 				categoryDiv.querySelector(".category_name")?.textContent;
+
+			let name: string;
 			if (!categoryName) {
-				throw new NotFoundError(
+				this.errors.push(
 					`could not find class category_name in category ${i} round ${round}`
 				);
+				name = ERROR_PLACEHOLDER;
+			} else {
+				name = categoryName;
 			}
+
 			let note = categoryDiv.querySelector(".category_comments")?.textContent;
 			if (note) {
 				// Change (Speaker: <note>) to <note>
 				note = note.replace(/\(\w+: (.*)\)/, "$1");
 			}
+
 			this.categories[i] = {
-				name: categoryName,
+				name,
 				note: note ?? "",
 				clues: [],
 			};
@@ -235,7 +243,7 @@ class BoardParser {
 
 		// Pull Clues
 		let col = 0;
-		const clueDivs = roundDiv.getElementsByClassName("clue");
+		const clueDivs = roundDiv ? roundDiv.getElementsByClassName("clue") : [];
 		let row = 0;
 		for (const clueDiv of clueDivs) {
 			this.categories[col].clues.push(new ClueParser(clueDiv, row, col, round));
@@ -247,33 +255,50 @@ class BoardParser {
 		}
 	}
 
-	jsonify(): Board {
+	jsonify(): { board: Board; error?: string } {
+		const errors = [...this.errors];
+
 		const categoryNames = this.categories.map((cat) => cat.name);
-		return {
+
+		const board: Board = {
 			categoryNames,
 			categories: this.categories.map((cat) => ({
 				name: cat.name,
 				note: cat.note,
-				clues: cat.clues.map((clue) => clue.jsonify()),
+				clues: cat.clues.map((clueParser) => {
+					const { clue, error } = clueParser.jsonify();
+					if (error) {
+						errors.push(error);
+					}
+					return clue;
+				}),
 			})),
 		};
+
+		const error = errors.length ? errors.join("\n") : undefined;
+		return { board, error };
 	}
 }
 
 class ClueParser {
-	clue: string;
-	value: number;
-	answer: string;
-	wagerable?: boolean;
-	i: number;
-	j: number;
+	private clue: string;
+	private value: number;
+	private answer: string;
+	private wagerable?: boolean;
+	private errors: string[];
 
 	constructor(clueDiv: Element, i: number, j: number, round: number) {
-		this.i = i;
-		this.j = j;
+		this.errors = [];
+		let unrevealed = false;
+
 		// Identify Clue Text
 		const clue = clueDiv.querySelector(".clue_text")?.textContent;
-		this.clue = clue ?? "Unrevealed";
+		if (!clue) {
+			unrevealed = true;
+			this.clue = "Unrevealed";
+		} else {
+			this.clue = clue;
+		}
 
 		// Find Clue Value
 		const clueValueText = clueDiv.querySelector(".clue_value")?.textContent;
@@ -283,16 +308,20 @@ class ClueParser {
 
 		if (clueValueText) {
 			if (!clueValueText.startsWith("$")) {
-				throw new Error("clue value does not start with '$'");
+				this.errors.push(`clue value (${i}, ${j}) does not start with '$'`);
 			}
 			const clueValue = parseInt(clueValueText.slice(1));
 			if (isNaN(clueValue)) {
-				throw new Error("could not parse clue value " + clueValueText);
+				this.errors.push(
+					`could not parse clue value (${i}, ${j}) text ${clueValueText}`
+				);
 			}
 			this.value = clueValue;
 		} else if (clueValueDDText) {
 			if (!clueValueDDText.startsWith("DD: $")) {
-				throw new Error("DD clue value does not start with 'DD: $'");
+				this.errors.push(
+					`DD clue value (${i}, ${j}) does not start with 'DD: $'`
+				);
 			}
 			this.value = getExpectedClueValue(i, round);
 			this.wagerable = true;
@@ -301,26 +330,30 @@ class ClueParser {
 			this.value = getExpectedClueValue(i, round);
 		}
 
-		const mouseOverDiv =
-			clueDiv.children[0]?.children[0]?.children[0]?.children[0]?.children[0];
-		try {
-			this.answer = parseCorrectResponse(mouseOverDiv, `clue ${i}, ${j}`);
-		} catch (error: unknown) {
-			if (isNotFoundError(error)) {
+		const answerText = clueDiv.querySelector(".correct_response")?.textContent;
+		if (!answerText) {
+			if (unrevealed) {
 				this.answer = "Unrevealed";
 			} else {
-				throw error;
+				this.errors.push(
+					`could not find class correct_response in round ${round}, clue (${i}, ${j})`
+				);
+				this.answer = ERROR_PLACEHOLDER;
 			}
+		} else {
+			this.answer = parseCorrectResponse(answerText);
 		}
 	}
 
-	jsonify(): Clue {
-		return {
+	jsonify(): { clue: Clue; error?: string } {
+		const clue: Clue = {
 			clue: this.clue,
 			answer: this.answer,
 			value: this.value,
 			wagerable: this.wagerable,
 		};
+		const error = this.errors.length ? this.errors.join("\n") : undefined;
+		return { clue, error };
 	}
 }
 
