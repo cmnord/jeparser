@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill";
 
-import { Game } from "src/content-script";
+import { Game } from "src/parser";
 
 interface Response {
 	game: Game;

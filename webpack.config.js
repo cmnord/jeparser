@@ -6,6 +6,7 @@ module.exports = {
 	devtool: "source-map",
 	stats: "errors-only",
 	entry: {
+		parser: "./src/parser",
 		"content-script": "./src/content-script",
 		"popup/popup": "./src/popup/popup",
 	},
