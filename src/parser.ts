@@ -33,6 +33,13 @@ interface Clue {
 
 /** ERROR_PLACEHOLDER is used when a field has an error. */
 const ERROR_PLACEHOLDER = "***ERROR***";
+/** UNREVEALED_PLACEHOLDER is used when a field was not revealed in the game playthrough. */
+const UNREVEALED_PLACEHOLDER = "***Unrevealed***";
+/** MISSING_PLACEHOLDER is used when a field was not recorded on j-archive.  */
+const MISSING_PLACEHOLDER = "***Missing***";
+
+/** MISSING_CLUE_FLAG is used by j-archive when a clue was not recorded. */
+const MISSING_CLUE_FLAG = "=";
 
 /** parseGame parses the j-archive website and returns a representation of the
  * game in JSON.
@@ -128,7 +135,7 @@ class FinalBoardParser {
 
 		const categoryName = roundDiv?.querySelector(".category_name")?.textContent;
 		if (!categoryName) {
-			this.errors.push("could not find class category_name on page");
+			this.errors.push("could not find class category_name in final round");
 			this.category = ERROR_PLACEHOLDER;
 		} else {
 			this.category = categoryName;
@@ -136,7 +143,7 @@ class FinalBoardParser {
 
 		const clueText = roundDiv?.querySelector(".clue_text")?.textContent;
 		if (!clueText) {
-			this.errors.push("could not find class clue_text on page");
+			this.errors.push("could not find class clue_text in final round");
 			this.clue = ERROR_PLACEHOLDER;
 		} else {
 			this.clue = clueText;
@@ -206,6 +213,8 @@ class BoardParser {
 					`could not find class category_name in category ${i} round ${round}`
 				);
 				name = ERROR_PLACEHOLDER;
+			} else if (categoryName === MISSING_CLUE_FLAG) {
+				name = MISSING_PLACEHOLDER;
 			} else {
 				name = categoryName;
 			}
@@ -277,7 +286,9 @@ class ClueParser {
 		const clue = clueDiv.querySelector(".clue_text")?.textContent;
 		if (!clue) {
 			unrevealed = true;
-			this.clue = "Unrevealed";
+			this.clue = UNREVEALED_PLACEHOLDER;
+		} else if (clue === MISSING_CLUE_FLAG) {
+			this.clue = MISSING_PLACEHOLDER;
 		} else {
 			this.clue = clue;
 		}
@@ -289,10 +300,8 @@ class ClueParser {
 		)?.textContent;
 
 		if (clueValueText) {
-			if (!clueValueText.startsWith("$")) {
-				this.errors.push(`clue value (${i}, ${j}) does not start with '$'`);
-			}
-			const clueValue = parseInt(clueValueText.slice(1));
+			const startIdx = clueValueText.startsWith("$") ? 1 : 0;
+			const clueValue = parseInt(clueValueText.slice(startIdx));
 			if (isNaN(clueValue)) {
 				this.errors.push(
 					`could not parse clue value (${i}, ${j}) text ${clueValueText}`
@@ -300,9 +309,9 @@ class ClueParser {
 			}
 			this.value = clueValue;
 		} else if (clueValueDDText) {
-			if (!clueValueDDText.startsWith("DD: $")) {
+			if (!clueValueDDText.startsWith("DD: ")) {
 				this.errors.push(
-					`DD clue value (${i}, ${j}) does not start with 'DD: $'`
+					`DD clue value (${i}, ${j}) does not start with 'DD: '`
 				);
 			}
 			this.value = getExpectedClueValue(i, round);
@@ -313,15 +322,15 @@ class ClueParser {
 		}
 
 		const answerText = clueDiv.querySelector(".correct_response")?.textContent;
-		if (!answerText) {
-			if (unrevealed) {
-				this.answer = "Unrevealed";
-			} else {
-				this.errors.push(
-					`could not find class correct_response in round ${round}, clue (${i}, ${j})`
-				);
-				this.answer = ERROR_PLACEHOLDER;
-			}
+		if (unrevealed) {
+			this.answer = UNREVEALED_PLACEHOLDER;
+		} else if (answerText === MISSING_CLUE_FLAG) {
+			this.answer = MISSING_PLACEHOLDER;
+		} else if (!answerText) {
+			this.errors.push(
+				`could not find class correct_response in round ${round}, clue (${i}, ${j})`
+			);
+			this.answer = ERROR_PLACEHOLDER;
 		} else {
 			this.answer = parseCorrectResponse(answerText);
 		}
