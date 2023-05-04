@@ -61,9 +61,9 @@ function getExpectedClueValue(i: number, round: number) {
 export class GameParser {
 	private title: string;
 	private note: string;
-	private j: BoardParser;
-	private dj: BoardParser;
-	private fj: FinalBoardParser;
+	private j?: BoardParser;
+	private dj?: BoardParser;
+	private fj?: FinalBoardParser;
 	private errors: string[];
 
 	constructor(root: HTMLElement) {
@@ -81,31 +81,48 @@ export class GameParser {
 		this.note = note ?? "";
 
 		const jDiv = root.querySelector<HTMLElement>("#jeopardy_round");
-		this.j = new BoardParser(0, jDiv);
+		if (jDiv) {
+			this.j = new BoardParser(0, jDiv);
+		}
 
 		const djDiv = root.querySelector<HTMLElement>("#double_jeopardy_round");
-		this.dj = new BoardParser(1, djDiv);
+		if (djDiv) {
+			this.dj = new BoardParser(1, djDiv);
+		}
 
 		const fjDiv = root.querySelector<HTMLElement>("#final_jeopardy_round");
-		this.fj = new FinalBoardParser(fjDiv);
+		if (fjDiv) {
+			this.fj = new FinalBoardParser(fjDiv);
+		}
 	}
 
 	jsonify() {
-		const { board: jBoard, error: jError } = this.j.jsonify();
-		const { board: djBoard, error: djError } = this.dj.jsonify();
-		const { board: fjBoard, error: fjError } = this.fj.jsonify();
-
 		const game: Game = {
 			title: this.title,
 			author: "J! Archive",
 			copyright: "Jeopardy!",
 			note: this.note,
-			boards: [jBoard, djBoard, fjBoard],
+			boards: [],
 		};
 
-		const errors = [...this.errors, jError, djError, fjError].filter(
-			(e): e is string => e !== undefined
-		);
+		const errors = [...this.errors];
+
+		if (this.j && !this.j.isEmpty()) {
+			const { board, error } = this.j.jsonify();
+			game.boards.push(board);
+			if (error) errors.push(error);
+		}
+		if (this.dj && !this.dj.isEmpty()) {
+			const { board, error } = this.dj.jsonify();
+			game.boards.push(board);
+			if (error) errors.push(error);
+		}
+		if (this.fj) {
+			const { board, error } = this.fj.jsonify();
+			game.boards.push(board);
+			if (error) errors.push(error);
+		}
+
 		const error = errors.length ? errors.join("\n") : undefined;
 		return { game, error };
 	}
@@ -126,12 +143,8 @@ class FinalBoardParser {
 	private answer: string;
 	private errors: string[];
 
-	constructor(roundDiv: HTMLElement | null) {
+	constructor(roundDiv: HTMLElement) {
 		this.errors = [];
-
-		if (!roundDiv) {
-			this.errors.push("could not find final jeopardy round on page");
-		}
 
 		const categoryName = roundDiv?.querySelector(".category_name")?.textContent;
 		if (!categoryName) {
@@ -191,15 +204,10 @@ class BoardParser {
 	}[];
 	private errors: string[];
 
-	constructor(round: number, roundDiv: HTMLElement | null) {
+	constructor(round: number, roundDiv: HTMLElement) {
 		this.errors = [];
 
-		if (!roundDiv) {
-			this.errors.push("could not find round " + round + " on page");
-		}
-		const categoryDivs = roundDiv
-			? roundDiv.getElementsByClassName("category")
-			: [];
+		const categoryDivs = roundDiv.getElementsByClassName("category");
 		this.categories = new Array(categoryDivs.length);
 
 		for (let i = 0; i < categoryDivs.length; i++) {
@@ -234,7 +242,7 @@ class BoardParser {
 
 		// Pull Clues
 		let col = 0;
-		const clueDivs = roundDiv ? roundDiv.getElementsByClassName("clue") : [];
+		const clueDivs = roundDiv.getElementsByClassName("clue");
 		let row = 0;
 		for (const clueDiv of clueDivs) {
 			this.categories[col].clues.push(new ClueParser(clueDiv, row, col, round));
@@ -244,6 +252,13 @@ class BoardParser {
 				row += 1;
 			}
 		}
+	}
+
+	/** isEmpty checks if every clue in the board is empty. */
+	isEmpty() {
+		return this.categories.every((cat) =>
+			cat.clues.every((clue) => clue.isEmpty())
+		);
 	}
 
 	jsonify(): { board: Board; error?: string } {
@@ -334,6 +349,16 @@ class ClueParser {
 		} else {
 			this.answer = parseCorrectResponse(answerText);
 		}
+	}
+
+	/** isEmpty checks if the clue and answer are both missing or unrevealed. */
+	isEmpty() {
+		return (
+			(this.clue === MISSING_PLACEHOLDER ||
+				this.clue === UNREVEALED_PLACEHOLDER) &&
+			(this.answer === MISSING_PLACEHOLDER ||
+				this.answer === UNREVEALED_PLACEHOLDER)
+		);
 	}
 
 	jsonify(): { clue: Clue; error?: string } {
