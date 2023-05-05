@@ -41,6 +41,13 @@ const MISSING_PLACEHOLDER = "***Missing***";
 /** MISSING_CLUE_FLAG is used by j-archive when a clue was not recorded. */
 const MISSING_CLUE_FLAG = "=";
 
+/** VALUE_DOUBLING_DATE is the day that clue values were doubled. */
+const VALUE_DOUBLING_DATE = new Date(2001, 11 - 1, 26);
+/** TITLE_REGEX contains a capture group for the month, day, and year.
+ * Example: "Show #3966 - Monday, November 26, 2001"
+ */
+const TITLE_REGEX = /#\d+ - \w+, (\w+ \d+, \d+)/;
+
 /** parseGame parses the j-archive website and returns a representation of the
  * game in JSON.
  */
@@ -49,12 +56,27 @@ export function parseGame(element: HTMLElement) {
 	return gameParser.jsonify();
 }
 
+/** getClueValueMultiplier checks if the game occurred before or after the
+ * VALUE_DOUBLING_DATE.
+ */
+function getClueValueMultiplier(title: string): 1 | 2 {
+	const matches = title.match(TITLE_REGEX);
+	if (!matches) {
+		throw new Error("could not parse title " + title);
+	}
+	const date = new Date(Date.parse(matches[1]));
+	if (date < VALUE_DOUBLING_DATE) {
+		return 1;
+	}
+	return 2;
+}
+
 /** getExpectedClueValue gets the expected clue value based on its position in
  * the board before revealing it. Otherwise, the clue value for wagerable or
  * unrevealed clues would be 0.
  */
-function getExpectedClueValue(i: number, round: number) {
-	return (i + 1) * 200 * (round + 1);
+function getExpectedClueValue(i: number, round: number, multiplier: 1 | 2) {
+	return 100 * (i + 1) * (round + 1) * multiplier;
 }
 
 // Classes based on https://glitch.com/~jarchive-json
@@ -76,18 +98,19 @@ export class GameParser {
 		} else {
 			this.title = title;
 		}
+		const multiplier = getClueValueMultiplier(this.title);
 
 		const note = root.querySelector("#game_comments")?.textContent;
 		this.note = note ?? "";
 
 		const jDiv = root.querySelector<HTMLElement>("#jeopardy_round");
 		if (jDiv) {
-			this.j = new BoardParser(0, jDiv);
+			this.j = new BoardParser(0, jDiv, multiplier);
 		}
 
 		const djDiv = root.querySelector<HTMLElement>("#double_jeopardy_round");
 		if (djDiv) {
-			this.dj = new BoardParser(1, djDiv);
+			this.dj = new BoardParser(1, djDiv, multiplier);
 		}
 
 		const fjDiv = root.querySelector<HTMLElement>("#final_jeopardy_round");
@@ -204,7 +227,7 @@ class BoardParser {
 	}[];
 	private errors: string[];
 
-	constructor(round: number, roundDiv: HTMLElement) {
+	constructor(round: number, roundDiv: HTMLElement, multiplier: 1 | 2) {
 		this.errors = [];
 
 		const categoryDivs = roundDiv.getElementsByClassName("category");
@@ -245,7 +268,9 @@ class BoardParser {
 		const clueDivs = roundDiv.getElementsByClassName("clue");
 		let row = 0;
 		for (const clueDiv of clueDivs) {
-			this.categories[col].clues.push(new ClueParser(clueDiv, row, col, round));
+			this.categories[col].clues.push(
+				new ClueParser(clueDiv, row, col, round, multiplier)
+			);
 			col += 1;
 			if (col > 5) {
 				col = 0;
@@ -293,7 +318,13 @@ class ClueParser {
 	private wagerable?: boolean;
 	private errors: string[];
 
-	constructor(clueDiv: Element, i: number, j: number, round: number) {
+	constructor(
+		clueDiv: Element,
+		i: number,
+		j: number,
+		round: number,
+		multiplier: 1 | 2
+	) {
 		this.errors = [];
 		let unrevealed = false;
 
@@ -329,11 +360,11 @@ class ClueParser {
 					`DD clue value (${i}, ${j}) does not start with 'DD: '`
 				);
 			}
-			this.value = getExpectedClueValue(i, round);
+			this.value = getExpectedClueValue(i, round, multiplier);
 			this.wagerable = true;
 		} else {
 			// Unrevealed
-			this.value = getExpectedClueValue(i, round);
+			this.value = getExpectedClueValue(i, round, multiplier);
 		}
 
 		const answerText = clueDiv.querySelector(".correct_response")?.textContent;
