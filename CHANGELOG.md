@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.1.0](https://github.com/cmnord/jeparser/compare/v3.0.2...v3.1.0) (2023-05-05)
+
+
+### Features
+
+* **src parser:** check game date to get expected clue value ([8b2b382](https://github.com/cmnord/jeparser/commit/8b2b3825aaf2f93819b8dfa2b6b28570b5968f73))
+* **src parser:** separate parser logic into its own file ([49159f6](https://github.com/cmnord/jeparser/commit/49159f69032d7f265b76904c133195b32349dbcb))
+* **src parser:** skip over missing boards ([fa248c6](https://github.com/cmnord/jeparser/commit/fa248c62d38cdb366b1f28759a65a8efa5b565ef))
+
+
+### Bug Fixes
+
+* **src parser:** handle unrevealed clues, categories, answers "=" ([360785b](https://github.com/cmnord/jeparser/commit/360785b7360656599af2af8c57560f747c429e3d))
+
 ## [3.0.2](https://github.com/cmnord/jeparser/compare/v3.0.1...v3.0.2) (2023-04-30)
 
 
