@@ -43,10 +43,17 @@ const MISSING_CLUE_FLAG = "=";
 
 /** VALUE_DOUBLING_DATE is the day that clue values were doubled. */
 const VALUE_DOUBLING_DATE = new Date(2001, 11 - 1, 26);
+
 /** TITLE_REGEX contains a capture group for the month, day, and year.
  * Example: "Show #3966 - Monday, November 26, 2001"
  */
 const TITLE_REGEX = /#\d+ - \w+, (\w+ \d+, \d+)/;
+/** HTML_REGEX is used to remove HTML tags. */
+const HTML_REGEX = /<[^>]*>/g;
+/** QUOTE_REGEX is used to replace backslash-escaped quotes with just '. */
+const QUOTE_REGEX = /'/g;
+/** SPEAKER_REGEX is used to replace (Speaker: <note>) with just <note>. */
+const SPEAKER_REGEX = /\(\w+: (.*)\)/;
 
 /** parseGame parses the j-archive website and returns a representation of the
  * game in JSON.
@@ -151,13 +158,12 @@ export class GameParser {
 	}
 }
 
-/** parseCorrectResponse parses the onmouseover attribute of the clue header
- * element to find the correct response. */
+/** parseCorrectResponse parses the .correct_response element into plain text. */
 function parseCorrectResponse(answerText: string) {
 	// Remove HTML tags
-	const responseStr = answerText.replace(/<[^>]*>/g, "");
+	const responseStr = answerText.replace(HTML_REGEX, "");
 	// Replace backslash-escaped quotes
-	return responseStr.replace(/\\'/g, "'");
+	return responseStr.replace(QUOTE_REGEX, "'");
 }
 
 class FinalBoardParser {
@@ -253,7 +259,7 @@ class BoardParser {
 			let note = categoryDiv.querySelector(".category_comments")?.textContent;
 			if (note) {
 				// Change (Speaker: <note>) to <note>
-				note = note.replace(/\(\w+: (.*)\)/, "$1");
+				note = note.replace(SPEAKER_REGEX, "$1");
 			}
 
 			this.categories[i] = {
