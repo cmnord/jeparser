@@ -29,6 +29,9 @@ interface Clue {
 	 * over a longer time period instead of competing to buzz in.
 	 */
 	longForm?: boolean;
+	/** imageSrc is the URL of an image to display with the clue.
+	 */
+	imageSrc?: string;
 }
 
 /** ERROR_PLACEHOLDER is used when a field has an error. */
@@ -84,6 +87,21 @@ function getClueValueMultiplier(title: string): 1 | 2 {
  */
 function getExpectedClueValue(i: number, round: number, multiplier: 1 | 2) {
 	return 100 * (i + 1) * (round + 1) * multiplier;
+}
+
+function sanitizeURL(rawURL: string) {
+	try {
+		const url = new URL(rawURL);
+		if (url.protocol !== "http:" && url.protocol !== "https:") {
+			throw new Error("invalid protocol " + url.protocol);
+		}
+		return { url: url.toString(), error: null };
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			return { url: "", error: error.message };
+		}
+		return { url: "", error: "unknown error" };
+	}
 }
 
 // Classes based on https://glitch.com/~jarchive-json
@@ -170,6 +188,7 @@ class FinalBoardParser {
 	private category: string;
 	private clue: string;
 	private answer: string;
+	private imageSrc?: string;
 	private errors: string[];
 
 	constructor(roundDiv: HTMLElement) {
@@ -183,12 +202,22 @@ class FinalBoardParser {
 			this.category = categoryName;
 		}
 
-		const clueText = roundDiv?.querySelector(".clue_text")?.textContent;
+		const clueTextElement = roundDiv?.querySelector(".clue_text");
+		const clueText = clueTextElement?.textContent;
 		if (!clueText) {
 			this.errors.push("could not find class clue_text in final round");
 			this.clue = ERROR_PLACEHOLDER;
 		} else {
 			this.clue = clueText;
+		}
+
+		const clueImageLinks = clueTextElement?.getElementsByTagName("a");
+		if (clueImageLinks?.length) {
+			const { url, error } = sanitizeURL(clueImageLinks[0].href);
+			this.imageSrc = url;
+			if (error) {
+				this.errors.push(`could not parse image URL in final round: ${error}`);
+			}
 		}
 
 		const answerText =
@@ -322,6 +351,7 @@ class ClueParser {
 	private value: number;
 	private answer: string;
 	private wagerable?: boolean;
+	private imageSrc?: string;
 	private errors: string[];
 
 	constructor(
@@ -335,14 +365,26 @@ class ClueParser {
 		let unrevealed = false;
 
 		// Identify Clue Text
-		const clue = clueDiv.querySelector(".clue_text")?.textContent;
-		if (!clue) {
+		const clueTextElement = clueDiv.querySelector(".clue_text");
+		const clueText = clueTextElement?.textContent;
+		if (!clueText) {
 			unrevealed = true;
 			this.clue = UNREVEALED_PLACEHOLDER;
-		} else if (clue === MISSING_CLUE_FLAG) {
+		} else if (clueText === MISSING_CLUE_FLAG) {
 			this.clue = MISSING_PLACEHOLDER;
 		} else {
-			this.clue = clue;
+			this.clue = clueText;
+		}
+
+		const clueImageLinks = clueTextElement?.getElementsByTagName("a");
+		if (clueImageLinks?.length) {
+			const { url, error } = sanitizeURL(clueImageLinks[0].href);
+			this.imageSrc = url;
+			if (error) {
+				this.errors.push(
+					`could not parse image URL in round ${round}, clue (${i}, ${j}): ${error}`
+				);
+			}
 		}
 
 		// Find Clue Value
@@ -356,14 +398,14 @@ class ClueParser {
 			const clueValue = parseInt(clueValueText.slice(startIdx));
 			if (isNaN(clueValue)) {
 				this.errors.push(
-					`could not parse clue value (${i}, ${j}) text ${clueValueText}`
+					`could not parse value of round ${round}, clue (${i}, ${j}): ${clueValueText}`
 				);
 			}
 			this.value = clueValue;
 		} else if (clueValueDDText) {
 			if (!clueValueDDText.startsWith("DD: ")) {
 				this.errors.push(
-					`DD clue value (${i}, ${j}) does not start with 'DD: '`
+					`DD value of round ${round}, clue (${i}, ${j}) does not start with 'DD: '`
 				);
 			}
 			this.value = getExpectedClueValue(i, round, multiplier);
@@ -404,6 +446,7 @@ class ClueParser {
 			answer: this.answer,
 			value: this.value,
 			wagerable: this.wagerable,
+			imageSrc: this.imageSrc,
 		};
 		const error = this.errors.length ? this.errors.join("\n") : undefined;
 		return { clue, error };
