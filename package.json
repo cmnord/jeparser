@@ -4,6 +4,7 @@
 	"scripts": {
 		"build": "webpack --mode=production",
 		"dev": "webpack --mode=development --watch",
+		"lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
 		"release:cws": "chrome-webstore-upload upload --source=dist --auto-publish",
 		"release:amo": "web-ext-submit --source-dir dist",
 		"release": "VER=$(npx dot-json src/manifest.json version) run-s build version release:*",
@@ -14,6 +15,8 @@
 	"devDependencies": {
 		"@types/firefox-webext-browser": "^109.0.0",
 		"@types/webextension-polyfill": "^0.10.2",
+		"@typescript-eslint/eslint-plugin": "^6.4.1",
+		"@typescript-eslint/parser": "^6.4.1",
 		"chrome-webstore-upload-cli": "^2.2.2",
 		"copy-webpack-plugin": "^11.0.0",
 		"dot-json": "^1.3.0",
