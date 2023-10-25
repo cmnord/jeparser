@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.2.0](https://github.com/cmnord/jeparser/compare/v3.1.0...v3.2.0) (2023-10-25)
+
+
+### Features
+
+* **src parser:** add optional image source URL to each clue ([7aa021c](https://github.com/cmnord/jeparser/commit/7aa021c84ea1a8d11ae12da478e9280a9ca9e7e4))
+
+
+### Bug Fixes
+
+* **eslintrc:** configure eslint and run on codebase ([6e38012](https://github.com/cmnord/jeparser/commit/6e38012095efa9d4f4bb25b179728561c84f7a81))
+
 ## [3.1.0](https://github.com/cmnord/jeparser/compare/v3.0.2...v3.1.0) (2023-05-05)
 
 
