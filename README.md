@@ -62,6 +62,9 @@ Build the extension, then attempt to deploy it to both stores:
 npm run release
 ```
 
+Release-please uses the [Conventional Commits][conventional-commits] commit
+message format to generate a changelog.
+
 ## Thanks
 
 - [WayneD/j-play](https://github.com/WayneD/j-play)
@@ -76,3 +79,4 @@ npm run release
 
 [link-cws-keys]: https://github.com/DrewML/chrome-webstore-upload/blob/master/How%20to%20generate%20Google%20API%20keys.md
 [link-amo-keys]: https://addons.mozilla.org/en-US/developers/addon/api/key
+[conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
